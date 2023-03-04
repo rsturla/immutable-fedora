@@ -16,14 +16,6 @@ RUN rpm-ostree install \
     rm -rf /var/* /tmp/* && \
     ostree container commit
 
-# Override default RPMs and install additional ones
-RUN rpm-ostree override remove \
-      toolbox firefox firefox-langpacks && \
-    rpm-ostree install distrobox gnome-tweaks just \
-  && \
-    rm -rf /var/* /tmp/* && \
-    ostree container commit
-
 # Configure systemd services
 RUN sed -i 's/#AutomaticUpdatePolicy.*/AutomaticUpdatePolicy=stage/' /etc/rpm-ostreed.conf  && \
     systemctl enable rpm-ostreed-automatic.timer && \
@@ -31,6 +23,18 @@ RUN sed -i 's/#AutomaticUpdatePolicy.*/AutomaticUpdatePolicy=stage/' /etc/rpm-os
   && \
     sed -i 's/#DefaultTimeoutStopSec.*/DefaultTimeoutStopSec=15s/' /etc/systemd/user.conf && \
     sed -i 's/#DefaultTimeoutStopSec.*/DefaultTimeoutStopSec=15s/' /etc/systemd/system.conf \
+  && \
+    rm -rf /var/* /tmp/* && \
+    ostree container commit
+
+# Override default RPMs and install additional ones
+RUN rpm-ostree override remove \
+      toolbox firefox firefox-langpacks && \
+    rpm-ostree install \
+      distrobox \
+      gnome-tweaks \
+      just \
+      libvirt virt-manager \
   && \
     rm -rf /var/* /tmp/* && \
     ostree container commit
