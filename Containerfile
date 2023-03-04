@@ -49,6 +49,11 @@ RUN rpm-ostree override remove \
 RUN rpm-ostree install \
       gnome-shell-extension-appindicator \
       gnome-shell-extension-dash-to-dock \
+      gnome-shell-extension-blur-my-shell \
+      yaru-theme \
+  && \
+    rm -f /var/lib/unbound/root.key && \
+    rm -f /var/lib/freeipmi/ipckey && \
   && \
     rm -rf /var/* /tmp/* && \
     ostree container commit
