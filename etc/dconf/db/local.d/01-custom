@@ -1,4 +1,4 @@
-# GNOME Shell configuration
+# GNOME Shell Extensions
 [org/gnome/shell]
 favorite-apps = ['org.mozilla.firefox.desktop', 'org.mozilla.Thunderbird.desktop', 'org.gnome.Nautilus.desktop', 'com.slack.Slack', 'org.gnome.Software.desktop', 'yelp.desktop']
 enabled-extensions = ['appindicatorsupport@rgcjonas.gmail.com', 'dash-to-dock@micxgx.gmail.com']
@@ -9,6 +9,7 @@ cursor-theme='Yaru'
 icon-theme='Yaru'
 gtk-theme='Yaru'
 font-antialiasing='rgba'
+color-scheme='prefer-dark'
 
 [org/gnome/desktop/sound]
 allow-volume-above-100-percent=true
