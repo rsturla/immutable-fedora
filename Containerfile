@@ -11,5 +11,12 @@ RUN rpm-ostree install \
         --uninstall=rpmfusion-free-release-$(rpm -E %fedora)-1.noarch  \
         --uninstall=rpmfusion-nonfree-release-$(rpm -E %fedora)-1.noarch \
   && \
-    rm -rf /var /tmp && \
+    rm -rf /var/* /tmp/* && \
+    ostree container commit
+
+# Override default RPMs and install additional ones
+RUN rpm-ostree override remove toolbox firefox firefox-langpacks && \
+    rpm-ostree install distrobox gnome-tweaks just \
+  && \
+    rm -rf /var/* /tmp/* && \
     ostree container commit
