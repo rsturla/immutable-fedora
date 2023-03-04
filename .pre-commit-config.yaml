@@ -1,0 +1,16 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: check-merge-conflict
+      - id: check-added-large-files
+      - id: check-yaml
+      - id: check-symlinks
+      - id: check-json
+      - id: end-of-file-fixer
+      - id: forbid-new-submodules
+      - id: pretty-format-json
+        args:
+          - --autofix
+      - id: trailing-whitespace
+      - id: mixed-line-ending
