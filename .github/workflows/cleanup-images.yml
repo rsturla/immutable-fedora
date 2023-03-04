@@ -6,9 +6,6 @@ on:
   # TODO: Remove this once we're sure it's working
   pull_request:
 
-env:
-  BASE_IMAGE: ghcr.io/${{ github.repository_owner }}/silverblue
-
 jobs:
   delete-containers:
     runs-on: ubuntu-latest
@@ -17,7 +14,7 @@ jobs:
     steps:
       - uses: actions/delete-package-versions@v4
         with:
-          package-name: ${{ env.BASE_IMAGE }}
+          package-name: silverblue
           package-type: container
           min-versions-to-keep: 1 # TODO: Set this to a larger number once we're sure it's working
           ignore-versions: 'latest(-\d+)?'
