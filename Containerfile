@@ -53,7 +53,7 @@ RUN rpm-ostree install \
       yaru-theme \
   && \
     rm -f /var/lib/unbound/root.key && \
-    rm -f /var/lib/freeipmi/ipckey && \
+    rm -f /var/lib/freeipmi/ipckey \
   && \
     rm -rf /var/* /tmp/* && \
     ostree container commit
