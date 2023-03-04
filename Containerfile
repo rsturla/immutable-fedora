@@ -2,6 +2,7 @@ ARG FEDORA_MAJOR_VERSION=37
 FROM quay.io/fedora-ostree-desktops/silverblue:${FEDORA_MAJOR_VERSION} AS final
 
 COPY usr /usr
+COPY etc /etc
 
 # Install RPM Fusion repositories
 RUN rpm-ostree install \
@@ -19,7 +20,9 @@ RUN rpm-ostree install \
 # Configure systemd services
 RUN sed -i 's/#AutomaticUpdatePolicy.*/AutomaticUpdatePolicy=stage/' /etc/rpm-ostreed.conf  && \
     systemctl enable rpm-ostreed-automatic.timer && \
-    systemctl enable flatpak-system-update.timer \
+    systemctl enable flatpak-system-update.timer && \
+    systemctl unmask dconf-update.service && \
+    systemctl enable dconf-update.service \
   && \
     sed -i 's/#DefaultTimeoutStopSec.*/DefaultTimeoutStopSec=15s/' /etc/systemd/user.conf && \
     sed -i 's/#DefaultTimeoutStopSec.*/DefaultTimeoutStopSec=15s/' /etc/systemd/system.conf \
@@ -39,7 +42,7 @@ RUN rpm-ostree override remove \
     rm -rf /var/* /tmp/* && \
     ostree container commit
 
-# Customize GNOME \
+# Customize GNOME
 RUN rpm-ostree install \
       gnome-shell-extension-appindicator \
       gnome-shell-extension-dash-to-dock \

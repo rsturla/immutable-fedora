@@ -1,0 +1,20 @@
+# GNOME Shell configuration
+[org/gnome/shell]
+favorite-apps = ['org.mozilla.firefox.desktop', 'org.mozilla.Thunderbird.desktop', 'org.gnome.Nautilus.desktop', 'org.gnome.Rhythmbox3.desktop', 'org.libreoffice.LibreOffice.writer.desktop', 'org.gnome.Software.desktop', 'yelp.desktop']
+enabled-extensions = ['appindicatorsupport@rgcjonas.gmail.com', 'dash-to-dock@micxgx.gmail.com']
+
+[org/gnome/desktop/interface]
+enable-hot-corners=false
+cursor-theme='Yaru'
+icon-theme='Yaru'
+gtk-theme='Yaru'
+font-antialiasing='rgba'
+
+[org/gnome/desktop/sound]
+allow-volume-above-100-percent=true
+theme-name='Yaru'
+
+[org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0]
+binding='<Control><Alt>t'
+command='gnome-terminal'
+name='gnome-terminal'
