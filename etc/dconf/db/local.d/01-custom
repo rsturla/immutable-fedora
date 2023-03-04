@@ -1,4 +1,3 @@
-# GNOME Shell Extensions
 [org/gnome/shell]
 favorite-apps = ['org.mozilla.firefox.desktop', 'org.mozilla.Thunderbird.desktop', 'org.gnome.Nautilus.desktop', 'com.slack.Slack', 'org.gnome.Software.desktop', 'yelp.desktop']
 enabled-extensions = ['appindicatorsupport@rgcjonas.gmail.com', 'dash-to-dock@micxgx.gmail.com']
@@ -10,6 +9,22 @@ icon-theme='Yaru'
 gtk-theme='Yaru'
 font-antialiasing='rgba'
 color-scheme='prefer-dark'
+
+[org/gnome/shell/extensions/dash-to-dock]
+dock-fixed=false
+dock-position='BOTTOM'
+dash-max-icon-size=32
+extend-height=false
+force-straight-corner=false
+disable-overview-on-startup=true
+apply-glossy-effect=true
+autohide=true
+autohide-in-fullscreen=false
+transparency-mode='FIXED'
+background-color='#ffffff'
+bolt-support=true
+click-action='focus-or-previews'
+require-pressure-to-show=false
 
 [org/gnome/desktop/sound]
 allow-volume-above-100-percent=true
