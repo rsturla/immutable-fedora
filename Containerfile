@@ -25,7 +25,9 @@ RUN rpm-ostree override remove \
     ostree container commit
 
 # Configure systemd services
-RUN sed -i 's/#AutomaticUpdatePolicy.*/AutomaticUpdatePolicy=stage/' /etc/rpm-ostreed.conf \
+RUN sed -i 's/#AutomaticUpdatePolicy.*/AutomaticUpdatePolicy=stage/' /etc/rpm-ostreed.conf  && \
+    systemctl enable rpm-ostreed-automatic.timer && \
+    systemctl enable flatpak-system-update.timer \
   && \
     rm -rf /var/* /tmp/* && \
     ostree container commit
