@@ -23,7 +23,6 @@ jobs:
         include:
           - fedora-version: 37
             is-latest: true
-            is-stable: true
 
     steps:
       - name: Checkout
@@ -46,14 +45,13 @@ jobs:
           images: |
             ${{ env.BASE_IMAGE }}
           tags: |
-            type=schedule,pattern={{date 'YYYYMMDD-hhmmss'}}
-            type=ref,event=branch
-            type=ref,event=pr
-            type=raw,value=stable,enable=${{ github.ref == 'refs/heads/main' && matrix.is-stable }}
-            type=sha
+            type=schedule,enable=${{ github.ref == 'refs/heads/main' }}
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' && matrix.is-latest }}
+            type=raw,value=pr-${{ github.event.pull_request.number }},enable=${{ github.event_name == 'pull_request' }}
+            type=raw,value=sha-${{ github.sha }},enable=${{ github.ref == 'refs/heads/main' }}
           flavor: |
             latest=${{ github.ref == 'refs/heads/main' && matrix.is-latest }}
-            suffix=-${{ matrix.fedora-version }}
+            suffix=-${{ matrix.fedora-version }},onlatest=false
 
       - name: Build and Push
         uses: docker/build-push-action@v3
