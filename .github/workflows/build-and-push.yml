@@ -1,11 +1,11 @@
 name: Build and Push OCI Image
 
 on:
+  schedule:
+    - cron: '0 0,12 * * *' # Twice daily
   push:
     branches:
       - main
-
-  # TODO: Remove pull_request trigger
   pull_request:
 
 env:
@@ -17,6 +17,13 @@ jobs:
     permissions:
       contents: read
       packages: write
+    strategy:
+      matrix:
+        fedora-version: [ 37 ]
+        include:
+          - fedora-version: 37
+            is-latest: true
+            is-stable: true
 
     steps:
       - name: Checkout
@@ -42,9 +49,11 @@ jobs:
             type=schedule,pattern={{date 'YYYYMMDD-hhmmss'}}
             type=ref,event=branch
             type=ref,event=pr
+            type=raw,value=stable,enable=${{ github.ref == 'refs/heads/main' && matrix.is-stable }}
             type=sha
           flavor: |
-            latest=${{ github.ref == 'refs/heads/main' }}
+            latest=${{ github.ref == 'refs/heads/main' && matrix.is-latest }}
+            suffix=-${{ matrix.fedora-version }}
 
       - name: Build and Push
         uses: docker/build-push-action@v3
@@ -57,4 +66,4 @@ jobs:
           # ensure the PR will not overwrite :latest.
           push: true
           build-args: |
-            FEDORA_MAJOR_VERSION=37
+            FEDORA_MAJOR_VERSION=${{ matrix.fedora-version }}
