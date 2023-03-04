@@ -1,0 +1,67 @@
+name: Build and Push OCI Image
+
+on:
+  schedule:
+    - cron: '0 0,12 * * *' # Twice daily
+  push:
+    branches:
+      - main
+  pull_request:
+
+env:
+  BASE_IMAGE: ghcr.io/${{ github.repository_owner }}/silverblue
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        fedora-version: [ 37 ]
+        include:
+          - fedora-version: 37
+            is-latest: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Docker
+        uses: docker/setup-buildx-action@v2
+
+      - name: Docker login
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate Docker metadata
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: |
+            ${{ env.BASE_IMAGE }}
+          tags: |
+            type=schedule,enable=${{ github.ref == 'refs/heads/main' }}
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' && matrix.is-latest }}
+            type=raw,value=pr-${{ github.event.pull_request.number }},enable=${{ github.event_name == 'pull_request' }}
+            type=raw,value=sha-${{ github.sha }},enable=${{ github.ref == 'refs/heads/main' }}
+          flavor: |
+            latest=${{ github.ref == 'refs/heads/main' && matrix.is-latest }}
+            suffix=-${{ matrix.fedora-version }},onlatest=false
+
+      - name: Build and Push
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: ./Containerfile
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          # Always push so changes can easily be tested.  Since all workflows require maintainer approval, we can check
+          # ensure the PR will not overwrite :latest.
+          push: true
+          build-args: |
+            FEDORA_MAJOR_VERSION=${{ matrix.fedora-version }}

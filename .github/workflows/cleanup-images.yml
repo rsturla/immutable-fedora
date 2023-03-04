@@ -1,0 +1,19 @@
+name: Cleanup images
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Daily
+
+jobs:
+  delete-containers:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    steps:
+      - uses: actions/delete-package-versions@v4
+        with:
+          package-name: silverblue
+          package-type: container
+          min-versions-to-keep: 10
+          ignore-versions: 'latest(-\d+)?'
+          token: ${{ secrets.GITHUB_TOKEN }}
