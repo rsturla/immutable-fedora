@@ -38,6 +38,7 @@ RUN rpm-ostree override remove \
       gnome-tweaks \
       just \
       libvirt virt-manager \
+      yq \
   && \
     rm -rf /var/* /tmp/* && \
     ostree container commit
