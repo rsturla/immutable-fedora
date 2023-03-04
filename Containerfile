@@ -38,3 +38,11 @@ RUN rpm-ostree override remove \
   && \
     rm -rf /var/* /tmp/* && \
     ostree container commit
+
+# Customize GNOME \
+RUN rpm-ostree install \
+      gnome-shell-extension-appindicator \
+      gnome-shell-extension-dash-to-dock \
+  && \
+    rm -rf /var/* /tmp/* && \
+    ostree container commit
