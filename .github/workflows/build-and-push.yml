@@ -19,7 +19,7 @@ jobs:
       packages: write
     strategy:
       matrix:
-        fedora-version: [ 37 ]
+        fedora-version: [ 37, 38 ]
         include:
           - fedora-version: 37
             is-latest: true
