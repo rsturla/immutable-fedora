@@ -45,13 +45,13 @@ jobs:
           images: |
             ${{ env.BASE_IMAGE }}
           tags: |
+            type=raw,value=pr-${{ github.event.pull_request.number }}-${{ matrix.fedora-version }},enable=${{ github.event_name == 'pull_request' }}
+            type=raw,value=sha-${{ github.sha }}-${{ matrix.fedora-version }},enable=${{ github.ref == 'refs/heads/main' }}
+
+            # Production tags
             type=schedule,enable=${{ github.ref == 'refs/heads/main' }}
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' && matrix.is-latest }}
-            type=raw,value=pr-${{ github.event.pull_request.number }},enable=${{ github.event_name == 'pull_request' }}
-            type=raw,value=sha-${{ github.sha }},enable=${{ github.ref == 'refs/heads/main' }}
-          flavor: |
-            latest=${{ github.ref == 'refs/heads/main' && matrix.is-latest }}
-            suffix=-${{ matrix.fedora-version }},onlatest=false
+            type=raw,value=latest-${{ matrix.fedora-version }},enable=${{ github.ref == 'refs/heads/main' }}
 
       - name: Build and Push
         uses: docker/build-push-action@v3
