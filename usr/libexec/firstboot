@@ -31,7 +31,7 @@ replace_fedora_flatpaks_with_flathub() {
 install_flatpaks() {
   echo "Installing flatpaks..."
   # Read list of Flatpaks from /etc/packages.yml and install them
-  flatpaks=$(yq e '.flatpaks[] | select(.scope == "system") | .name' /etc/packages.yml)
+  flatpaks=$(yq e '.flatpaks[] | .name' /etc/packages.yml)
   for flatpak in $flatpaks; do
     echo "Installing $flatpak..."
     /usr/bin/flatpak install --user --noninteractive flathub "$flatpak"
