@@ -15,5 +15,5 @@ jobs:
           package-name: silverblue
           package-type: container
           min-versions-to-keep: 10
-          ignore-versions: 'latest(-\d+)?'
+          ignore-versions: (latest|stable)(-\d+)?
           token: ${{ secrets.GITHUB_TOKEN }}
