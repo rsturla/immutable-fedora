@@ -22,6 +22,8 @@ jobs:
         fedora-version: [ 37, 38 ]
         include:
           - fedora-version: 37
+            is-stable: true
+          - fedora-version: 38
             is-latest: true
 
     steps:
@@ -38,30 +40,53 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Generate Docker metadata
-        id: meta
-        uses: docker/metadata-action@v4
-        with:
-          images: |
-            ${{ env.BASE_IMAGE }}
-          tags: |
-            type=raw,value=pr-${{ github.event.pull_request.number }}-${{ matrix.fedora-version }},enable=${{ github.event_name == 'pull_request' }}
-            type=raw,value=sha-${{ github.sha }}-${{ matrix.fedora-version }},enable=${{ github.ref == 'refs/heads/main' }}
+      - name: Generate tags (main)
+        if: github.ref == 'refs/heads/main'
+        run: |
+          DEFAULT_TAGS=()
+          TAG_SUFFIX="-${{ matrix.fedora-version }}"
 
-            # Production tags
-            type=schedule,enable=${{ github.ref == 'refs/heads/main' }}
-            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' && matrix.is-latest }}
-            type=raw,value=latest-${{ matrix.fedora-version }},enable=${{ github.ref == 'refs/heads/main' }}
+          # Add :<version> tag - e.g. :37
+          DEFAULT_TAGS+=("${{ matrix.fedora-version }}")
+          # Add date tag - e.g. :20230101000000-<version>
+          DEFAULT_TAGS+=("$(date -u +%Y%m%d%H%M%S)-${{ matrix.fedora-version }}")
+          # Add short SHA tag - e.g. :abcdef-<version>
+          DEFAULT_TAGS+=("${GITHUB_SHA::8}-${{ matrix.fedora-version }}")
+          # Add full SHA tag - e.g. :abcdef0123456789abcdef0123456789abcdef-<version>
+          DEFAULT_TAGS+=("${GITHUB_SHA}-${{ matrix.fedora-version }}")
+
+          # Add :latest tag if this is the latest Fedora version (inc. pre-releases)
+          if [ "${{ matrix.is-latest }}" = "true" ]; then
+            DEFAULT_TAGS+=("latest")
+          fi
+
+          # Add :stable tag if this is the latest stable Fedora version
+          if [ "${{ matrix.is-stable }}" = "true" ]; then
+            DEFAULT_TAGS+=("stable")
+          fi
+
+          # Prefix all tags with the base image name
+          for i in "${!DEFAULT_TAGS[@]}"; do
+            DEFAULT_TAGS[$i]="${BASE_IMAGE}:${DEFAULT_TAGS[$i]}"
+          done
+          echo "TAGS=${DEFAULT_TAGS[*]}" >> $GITHUB_ENV
+
+      - name: Generate tags (Pull Request)
+        if: github.event_name == 'pull_request'
+        run: |
+          DEFAULT_TAGS+=("pr-${{ github.event.pull_request.number }}-${{ matrix.fedora-version }}")
+          # Prefix all tags with the base image name
+          for i in "${!DEFAULT_TAGS[@]}"; do
+            DEFAULT_TAGS[$i]="${BASE_IMAGE}:${DEFAULT_TAGS[$i]}"
+          done
+          echo "TAGS=${DEFAULT_TAGS[*]}" >> $GITHUB_ENV
 
       - name: Build and Push
         uses: docker/build-push-action@v3
         with:
           context: .
           file: ./Containerfile
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          # Always push so changes can easily be tested.  Since all workflows require maintainer approval, we can check
-          # ensure the PR will not overwrite :latest.
+          tags: ${{ env.TAGS }}
           push: true
           build-args: |
             FEDORA_MAJOR_VERSION=${{ matrix.fedora-version }}
