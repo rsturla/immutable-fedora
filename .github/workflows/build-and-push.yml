@@ -66,14 +66,14 @@ jobs:
             DEFAULT_TAGS+=("stable")
           fi
 
-          echo "TAGS=$(printf '%s\n' "${DEFAULT_TAGS[@]}")" >> $GITHUB_ENV
+          echo "TAGS=${DEFAULT_TAGS[*]}" >> $GITHUB_ENV
 
       - name: Generate tags (Pull Request)
         if: github.event_name == 'pull_request'
         run: |
           DEFAULT_TAGS+=("pr-${{ github.event.pull_request.number }}-${{ matrix.fedora-version }}")
           DEFAULT_TAGS+=("test-${{ matrix.fedora-version }}")
-          echo "TAGS=$(printf '%s\n' "${DEFAULT_TAGS[@]}")" >> $GITHUB_ENV
+          echo "TAGS=${DEFAULT_TAGS[*]}" >> $GITHUB_ENV
 
       - name: Build and Push
         uses: redhat-actions/push-to-registry@v2
