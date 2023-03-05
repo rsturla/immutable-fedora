@@ -31,13 +31,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Podman Login
-        uses: redhat-actions/podman-login@v1
-        with:
-          registry: ${{ env.IMAGE_REGISTRY }}
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Generate Tags
         if: github.ref == 'refs/heads/main'
         run: |
@@ -88,5 +81,7 @@ jobs:
           image: ${{ steps.build.outputs.image }}
           tags: ${{ steps.build.outputs.tags }}
           registry: ${{ env.IMAGE_REGISTRY }}
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
           build_args: |
             FEDORA_MAJOR_VERSION=${{ matrix.fedora-version }}
