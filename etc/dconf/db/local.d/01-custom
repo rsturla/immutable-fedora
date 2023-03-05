@@ -20,6 +20,7 @@ disable-overview-on-startup=true
 apply-glossy-effect=true
 autohide=true
 autohide-in-fullscreen=false
+show-delay=0.10
 transparency-mode='FIXED'
 background-color='#ffffff'
 bolt-support=true
