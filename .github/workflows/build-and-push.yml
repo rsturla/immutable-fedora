@@ -72,7 +72,7 @@ jobs:
             ./Containerfile
           image: ${{ env.BASE_IMAGE }}
           tags: ${{ env.TAGS }}
-          build_args: |
+          build-args: |
             FEDORA_MAJOR_VERSION=${{ matrix.fedora-version }}
 
       - name: Push to Registry
@@ -84,5 +84,3 @@ jobs:
           registry: ${{ env.IMAGE_REGISTRY }}
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-          build_args: |
-            FEDORA_MAJOR_VERSION=${{ matrix.fedora-version }}
