@@ -4,24 +4,6 @@ default:
 bios:
   systemctl reboot --firmware-setup
 
-setup:
-  @setup-flatpaks
-
-setup-flatpaks:
-  echo "Installing system Flatpak applications"
-  flatpaks=$(yq e '.flatpaks[] | select(.scope == "system") | .name' /etc/packages.yml)
-  for flatpak in $flatpaks; do
-    echo "Installing $flatpak - $(echo $flatpaks | wc -w)/$(echo $flatpaks | wc -w)"
-    flatpak install -y $flatpak
-  done
-
-  echo "Installing user Flatpak applications"
-  flatpaks=$(yq e '.flatpaks[] | select(.scope == "user") | .name' /etc/packages.yml)
-  for flatpak in $flatpaks; do
-    echo "Installing $flatpak - $(echo $flatpaks | wc -w)/$(echo $flatpaks | wc -w)"
-    flatpak install -y --user $flatpak
-  done
-
 update:
   rpm-ostree upgrade
   flatpak update -y
