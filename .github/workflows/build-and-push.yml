@@ -10,6 +10,7 @@ on:
 
 env:
   BASE_IMAGE: ghcr.io/${{ github.repository_owner }}/silverblue
+  IMAGE_REGISTRY: ghcr.io/${{ github.repository_owner }}
 
 jobs:
   build-and-push:
@@ -65,10 +66,6 @@ jobs:
             DEFAULT_TAGS+=("stable")
           fi
 
-          # Prefix all tags with the base image name
-          for i in "${!DEFAULT_TAGS[@]}"; do
-            DEFAULT_TAGS[$i]="${BASE_IMAGE}:${DEFAULT_TAGS[$i]}"
-          done
           echo "TAGS=$(printf '%s\n' "${DEFAULT_TAGS[@]}")" >> $GITHUB_ENV
 
       - name: Generate tags (Pull Request)
@@ -76,19 +73,15 @@ jobs:
         run: |
           DEFAULT_TAGS+=("pr-${{ github.event.pull_request.number }}-${{ matrix.fedora-version }}")
           DEFAULT_TAGS+=("test-${{ matrix.fedora-version }}")
-          # Prefix all tags with the base image name
-          for i in "${!DEFAULT_TAGS[@]}"; do
-            DEFAULT_TAGS[$i]="${BASE_IMAGE}:${DEFAULT_TAGS[$i]}"
-          done
           echo "TAGS=$(printf '%s\n' "${DEFAULT_TAGS[@]}")" >> $GITHUB_ENV
 
       - name: Build and Push
-        uses: docker/build-push-action@v3
+        uses: redhat-actions/push-to-registry@v2
         with:
-          context: .
-          file: ./Containerfile
-          tags: |
-            ${{ env.TAGS }}
-          push: true
-          build-args: |
+          image: ${{ env.BASE_IMAGE }}
+          tags: ${{ env.TAGS }}
+          registry: ${{ env.IMAGE_REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          build_args: |
             FEDORA_MAJOR_VERSION=${{ matrix.fedora-version }}
