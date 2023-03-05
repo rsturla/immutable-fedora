@@ -75,11 +75,22 @@ jobs:
           DEFAULT_TAGS+=("test-${{ matrix.fedora-version }}")
           echo "TAGS=${DEFAULT_TAGS[*]}" >> $GITHUB_ENV
 
-      - name: Build and Push
-        uses: redhat-actions/push-to-registry@v2
+      - name: Build Image
+        uses: redhat-actions/buildah-build@v2
+        id: build
         with:
+          containerfile: ./Containerfile
           image: ${{ env.BASE_IMAGE }}
           tags: ${{ env.TAGS }}
+          build_args: |
+            FEDORA_MAJOR_VERSION=${{ matrix.fedora-version }}
+
+      - name: Push to Registry
+        uses: redhat-actions/push-to-registry@v2
+        id: push
+        with:
+          image: ${{ steps.build.outputs.image }}
+          tags: ${{ steps.build.outputs.tags }}
           registry: ${{ env.IMAGE_REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
