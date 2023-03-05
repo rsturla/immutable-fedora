@@ -42,7 +42,6 @@ jobs:
         if: github.ref == 'refs/heads/main'
         run: |
           DEFAULT_TAGS=()
-          TAG_SUFFIX="-${{ matrix.fedora-version }}"
 
           # Add :<version> tag - e.g. :37
           DEFAULT_TAGS+=("${{ matrix.fedora-version }}")
@@ -69,7 +68,6 @@ jobs:
         if: github.event_name == 'pull_request'
         run: |
           DEFAULT_TAGS+=("pr-${{ github.event.pull_request.number }}-${{ matrix.fedora-version }}")
-          DEFAULT_TAGS+=("test-${{ matrix.fedora-version }}")
           echo "TAGS=${DEFAULT_TAGS[*]}" >> $GITHUB_ENV
 
       - name: Build Image
