@@ -1,4 +1,4 @@
-# Personal Fedora Silverblue
+# Robert's Fedora Silverblue Image
 
 This is an OCI image based on Fedora Silverblue that is tuned for my personal use-cases.
 The image is built twice daily and is available for anybody to rebase to.
