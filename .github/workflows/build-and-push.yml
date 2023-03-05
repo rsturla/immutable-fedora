@@ -75,6 +75,7 @@ jobs:
         if: github.event_name == 'pull_request'
         run: |
           DEFAULT_TAGS+=("pr-${{ github.event.pull_request.number }}-${{ matrix.fedora-version }}")
+          DEFAULT_TAGS+=("pr-${{ github.event.pull_request.head.sha::8 }}-${{ matrix.fedora-version }}")
           # Prefix all tags with the base image name
           for i in "${!DEFAULT_TAGS[@]}"; do
             DEFAULT_TAGS[$i]="${BASE_IMAGE}:${DEFAULT_TAGS[$i]}"
@@ -86,7 +87,8 @@ jobs:
         with:
           context: .
           file: ./Containerfile
-          tags: ${{ env.TAGS }}
+          tags: |
+            ${{ env.TAGS }}
           push: true
           build-args: |
             FEDORA_MAJOR_VERSION=${{ matrix.fedora-version }}
