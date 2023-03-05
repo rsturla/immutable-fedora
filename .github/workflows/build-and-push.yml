@@ -51,7 +51,7 @@ jobs:
             # Production tags
             type=schedule,enable=${{ github.ref == 'refs/heads/main' }}
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' && matrix.is-latest }}
-            type=raw,value=latest-${{ matrix.fedora-version }},enable=${{ github.ref == 'refs/heads/main' && matrix.is-latest }}
+            type=raw,value=latest-${{ matrix.fedora-version }},enable=${{ github.ref == 'refs/heads/main' }}
 
       - name: Build and Push
         uses: docker/build-push-action@v3
