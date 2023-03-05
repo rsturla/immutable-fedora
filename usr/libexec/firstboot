@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+
+set -euox pipefail
+
+# An idempotent firstboot script to install and configure the Fedora Silverblue OS.
+# Most config has already been done in the Containerfile, but this script is required to do some user-level config.
+
+setup_automatic_flatpak_updates() {
+  echo "Setting up automatic flatpak updates..."
+  systemctl --user enable --now flatpak-user-update.timer
+}
+
+setup_flathub() {
+  echo "Removing filtered Flathub repository..."
+  /usr/bin/flatpak remote-delete flathub --force ||:
+  echo "Adding unfiltered Flathub repository..."
+  /usr/bin/flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+}
+
+wait_for_network() {
+  echo "Waiting for network..."
+  until /usr/bin/ping -q -c 1 flathub.org; do sleep 1; done
+}
+
+replace_fedora_flatpaks_with_flathub() {
+  echo "Replacing Fedora flatpaks with Flathub flatpaks..."
+  /usr/bin/flatpak install --user --noninteractive org.gnome.Platform//43
+  /usr/bin/flatpak install --user --noninteractive --reinstall flathub $(flatpak list --app-runtime=org.fedoraproject.Platform --columns=application | tail -n +1 )
+}
+
+install_flatpaks() {
+  echo "Installing flatpaks..."
+  # Read list of Flatpaks from /etc/packages.yml and install them
+  flatpaks=$(yq e '.flatpaks[] | .name' /etc/packages.yml)
+  for flatpak in $flatpaks; do
+    echo "Installing $flatpak..."
+    /usr/bin/flatpak install --user --noninteractive flathub "$flatpak"
+  done
+}
+
+mark_complete() {
+  echo "Firstboot complete!"
+  # Get hash of this script
+  hash=$(sha256sum "$0" | cut -d' ' -f1)
+  # Write hash to file
+  echo "$hash" > ~/.config/firstboot-complete
+}
+
+check_if_complete() {
+  # Get hash of this script
+  hash=$(sha256sum "$0" | cut -d' ' -f1)
+  # Check if hash matches hash in file
+  if [ -f ~/.config/firstboot-complete ] && [ "$hash" == "$(cat ~/.config/firstboot-complete)" ]; then
+    echo "Firstboot already complete!"
+    exit 0
+  fi
+}
+
+main() {
+  check_if_complete
+  wait_for_network
+  setup_automatic_flatpak_updates
+  setup_flathub
+  replace_fedora_flatpaks_with_flathub
+  install_flatpaks
+  mark_complete
+}
+
+main

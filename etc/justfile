@@ -1,0 +1,10 @@
+default:
+  @just --list
+
+bios:
+  systemctl reboot --firmware-setup
+
+update:
+  rpm-ostree upgrade
+  flatpak update -y
+  distrobox upgrade -a
