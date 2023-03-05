@@ -79,7 +79,8 @@ jobs:
         uses: redhat-actions/buildah-build@v2
         id: build
         with:
-          containerfile: ./Containerfile
+          containerfiles: |
+            ./Containerfile
           image: ${{ env.BASE_IMAGE }}
           tags: ${{ env.TAGS }}
           build_args: |
