@@ -28,6 +28,11 @@ replace_fedora_flatpaks_with_flathub() {
   /usr/bin/flatpak install --user --noninteractive --reinstall flathub $(flatpak list --app-runtime=org.fedoraproject.Platform --columns=application | tail -n +1 )
 }
 
+remove_fedora_preinstalled_flatpaks() {
+  echo "Removing Fedora preinstalled flatpaks..."
+  /usr/bin/flatpak remove --system --noninteractive --all ||:
+}
+
 install_flatpaks() {
   echo "Installing flatpaks..."
   # Read list of Flatpaks from /etc/packages.yml and install them
@@ -62,6 +67,7 @@ main() {
   setup_automatic_flatpak_updates
   setup_flathub
   replace_fedora_flatpaks_with_flathub
+  remove_fedora_preinstalled_flatpaks
   install_flatpaks
   mark_complete
 }
