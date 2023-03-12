@@ -17,7 +17,6 @@ flatpaks:
   # Work/Development
   - name: com.slack.Slack
   - name: us.zoom.Zoom
-  - name: https://downloads.1password.com/linux/flatpak/1Password.flatpakref
   - name: com.jetbrains.GoLand
   - name: com.jetbrains.DataGrip
   - name: com.jetbrains.IntelliJ-IDEA-Ultimate
