@@ -22,8 +22,7 @@ RUN sed -i 's/#AutomaticUpdatePolicy.*/AutomaticUpdatePolicy=stage/' /etc/rpm-os
     systemctl enable rpm-ostreed-automatic.timer && \
     systemctl enable flatpak-system-update.timer && \
     systemctl unmask dconf-update.service && \
-    systemctl enable dconf-update.service && \
-    systemctl --global enable firstboot-trigger.service \
+    systemctl enable dconf-update.service
   && \
     sed -i 's/#DefaultTimeoutStopSec.*/DefaultTimeoutStopSec=15s/' /etc/systemd/user.conf && \
     sed -i 's/#DefaultTimeoutStopSec.*/DefaultTimeoutStopSec=15s/' /etc/systemd/system.conf \
