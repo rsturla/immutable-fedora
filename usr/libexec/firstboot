@@ -34,7 +34,7 @@ install_flatpaks() {
   flatpaks=$(yq e '.flatpaks[] | .name' /etc/packages.yml)
   for flatpak in $flatpaks; do
     echo "Installing $flatpak..."
-    /usr/bin/flatpak install --user --noninteractive flathub "$flatpak"
+    /usr/bin/flatpak install --user --noninteractive "$flatpak"
   done
 }
 
