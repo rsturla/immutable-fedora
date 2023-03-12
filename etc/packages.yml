@@ -18,7 +18,6 @@ flatpaks:
   - name: us.zoom.Zoom
   - name: com.jetbrains.GoLand
   - name: com.jetbrains.DataGrip
-  - name: com.jetbrains.IntelliJ-IDEA-Ultimate
 
   # Gaming
   - name: com.valvesoftware.Steam
