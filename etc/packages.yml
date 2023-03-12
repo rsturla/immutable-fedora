@@ -9,7 +9,6 @@ flatpaks:
   - name: org.mozilla.firefox
   - name: org.mozilla.Thunderbird
   - name: org.onlyoffice.desktopeditors
-  - name: com.google.Chrome
 
   # Social
   - name: com.discordapp.Discord
