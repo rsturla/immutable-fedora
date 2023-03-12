@@ -13,7 +13,7 @@ flatpaks:
   # Social
   - name: com.discordapp.Discord
 
-  # Work/Development
+  # Work
   - name: com.slack.Slack
   - name: us.zoom.Zoom
   - name: com.jetbrains.GoLand
