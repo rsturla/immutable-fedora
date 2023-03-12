@@ -1,8 +1,26 @@
 flatpaks:
-  - name: org.mozilla.firefox
-  - name: org.mozilla.Thunderbird
+  # Utilities
   - name: com.mattjakeman.ExtensionManager
   - name: com.github.tchx84.Flatseal
+  - name: org.videolan.VLC
+  - name: com.spotify.Client
+
+  # Productivity
+  - name: org.mozilla.firefox
+  - name: org.mozilla.Thunderbird
   - name: org.onlyoffice.desktopeditors
   - name: com.google.Chrome
-  - name: org.videolan.VLC
+
+  # Social
+  - name: com.discordapp.Discord
+
+  # Work/Development
+  - name: com.slack.Slack
+  - name: us.zoom.Zoom
+  - name: https://downloads.1password.com/linux/flatpak/1Password.flatpakref
+  - name: com.jetbrains.GoLand
+  - name: com.jetbrains.DataGrip
+  - name: com.jetbrains.IntelliJ-IDEA-Ultimate
+
+  # Gaming
+  - name: com.valvesoftware.Steam
