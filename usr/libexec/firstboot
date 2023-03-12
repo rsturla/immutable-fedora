@@ -48,14 +48,17 @@ mark_complete() {
   # Get hash of this script
   hash=$(sha256sum "$0" | cut -d' ' -f1)
   # Write hash to file
-  echo "$hash" > ~/.config/firstboot-complete
+  echo "firstboot: $hash" >> ~/.config/firstboot-complete
+  echo "packages: $packages_hash" >> ~/.config/firstboot-complete
 }
 
 check_if_complete() {
-  # Get hash of this script
+  # Get hash of firstboot script
   hash=$(sha256sum "$0" | cut -d' ' -f1)
-  # Check if hash matches hash in file
-  if [ -f ~/.config/firstboot-complete ] && [ "$hash" == "$(cat ~/.config/firstboot-complete)" ]; then
+  # Get hash of packages.yml
+  packages_hash=$(sha256sum /etc/packages.yml | cut -d' ' -f1)
+  # Check if firstboot has already been run with the same script and packages.yml contents
+  if grep -q "firstboot: $hash" ~/.config/firstboot-complete && grep -q "packages: $packages_hash" ~/.config/firstboot-complete; then
     echo "Firstboot already complete!"
     exit 0
   fi
