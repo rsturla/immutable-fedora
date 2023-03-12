@@ -51,7 +51,6 @@ RUN rpm-ostree install \
       gnome-shell-extension-appindicator \
       gnome-shell-extension-dash-to-dock \
       gnome-shell-extension-blur-my-shell \
-      gnome-shell-extension-user-theme \
       yaru-theme \
   && \
     rm -f /var/lib/unbound/root.key && \
