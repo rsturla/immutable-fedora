@@ -1,8 +1,23 @@
 flatpaks:
-  - name: org.mozilla.firefox
-  - name: org.mozilla.Thunderbird
+  # Utilities
   - name: com.mattjakeman.ExtensionManager
   - name: com.github.tchx84.Flatseal
-  - name: org.onlyoffice.desktopeditors
-  - name: com.google.Chrome
   - name: org.videolan.VLC
+  - name: com.spotify.Client
+
+  # Productivity
+  - name: org.mozilla.firefox
+  - name: org.mozilla.Thunderbird
+  - name: org.onlyoffice.desktopeditors
+
+  # Social
+  - name: com.discordapp.Discord
+
+  # Work
+  - name: com.slack.Slack
+  - name: us.zoom.Zoom
+  - name: com.jetbrains.GoLand
+  - name: com.jetbrains.DataGrip
+
+  # Gaming
+  - name: com.valvesoftware.Steam
