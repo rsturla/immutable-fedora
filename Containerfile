@@ -42,7 +42,8 @@ RUN mkdir -p /var/opt && \
       chromium \
       1password \
   && \
-    mv /var/opt/1Password /usr/share/1Password \
+    mv /var/opt/1Password /usr/share/1Password && \
+    sed -i 's|^Exec=/opt/1Password/1password %U|Exec=/usr/share/1Password/1password %U|' /usr/share/applications/1password.desktop \
   && \
     wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq && \
     chmod +x /usr/bin/yq \
