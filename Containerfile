@@ -31,7 +31,8 @@ RUN sed -i 's/#AutomaticUpdatePolicy.*/AutomaticUpdatePolicy=stage/' /etc/rpm-os
     ostree container commit
 
 # Override default RPMs and install additional ones
-RUN rpm-ostree override remove \
+RUN mkdir -p /var/opt && \
+    rpm-ostree override remove \
       toolbox firefox firefox-langpacks && \
     rpm-ostree install \
       distrobox \
@@ -39,6 +40,7 @@ RUN rpm-ostree override remove \
       just \
       libvirt virt-manager \
       chromium \
+      1password \
   && \
     wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq && \
     chmod +x /usr/bin/yq \
@@ -52,9 +54,6 @@ RUN rpm-ostree install \
       gnome-shell-extension-dash-to-dock \
       gnome-shell-extension-blur-my-shell \
       yaru-theme \
-  && \
-    rm -f /var/lib/unbound/root.key && \
-    rm -f /var/lib/freeipmi/ipckey \
   && \
     rm -rf /var/* /tmp/* && \
     ostree container commit
