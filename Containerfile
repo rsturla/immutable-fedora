@@ -50,9 +50,9 @@ RUN rpm-ostree override remove \
 RUN curl -sSO https://downloads.1password.com/linux/tar/stable/x86_64/1password-latest.tar.gz && \
     tar -xf 1password-latest.tar.gz && \
     rm 1password-latest.tar.gz && \
-    mkdir -p /usr/1password && \
-    mv 1password-*/* /usr/1password && \
-    ln -s /usr/1password/1password /usr/bin/1password \
+    mkdir -p /usr/1Password && \
+    mv 1password-*/* /usr/1Password && \
+    sh /usr/libexec/1password-after-install.sh \
   && \
     rm -rf /var/* /tmp/* && \
     ostree container commit
