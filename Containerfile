@@ -32,7 +32,7 @@ RUN sed -i 's/#AutomaticUpdatePolicy.*/AutomaticUpdatePolicy=stage/' /etc/rpm-os
 
 # Override default RPMs and install additional ones
 RUN rpm-ostree override remove \
-      toolbox firefox firefox-langpacks && \
+      toolbox && \
     rpm-ostree install \
       distrobox \
       gnome-tweaks \
