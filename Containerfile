@@ -31,8 +31,7 @@ RUN sed -i 's/#AutomaticUpdatePolicy.*/AutomaticUpdatePolicy=stage/' /etc/rpm-os
     ostree container commit
 
 # Override default RPMs and install additional ones
-RUN mkdir -p /var/opt && \
-    rpm-ostree override remove \
+RUN rpm-ostree override remove \
       toolbox firefox firefox-langpacks && \
     rpm-ostree install \
       distrobox \
@@ -40,13 +39,20 @@ RUN mkdir -p /var/opt && \
       just \
       libvirt virt-manager \
       chromium \
-      1password \
-  && \
-    mv /var/opt/1Password /usr/share/1Password && \
-    sed -i 's|^Exec=/opt/1Password/1password %U|Exec=/usr/share/1Password/1password %U|' /usr/share/applications/1password.desktop \
   && \
     wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq && \
     chmod +x /usr/bin/yq \
+  && \
+    rm -rf /var/* /tmp/* && \
+    ostree container commit
+
+# Install 1Password via Tarball
+RUN curl -sSO https://downloads.1password.com/linux/tar/stable/x86_64/1password-latest.tar.gz && \
+    tar -xf 1password-latest.tar.gz && \
+    rm 1password-latest.tar.gz && \
+    mkdir -p /usr/1password && \
+    mv 1password-*/* /usr/1password && \
+    ln -s /usr/1password/1password /usr/bin/1password \
   && \
     rm -rf /var/* /tmp/* && \
     ostree container commit
