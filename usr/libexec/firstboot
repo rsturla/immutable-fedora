@@ -28,6 +28,11 @@ replace_fedora_flatpaks_with_flathub() {
   /usr/bin/flatpak install --user --noninteractive --reinstall flathub $(flatpak list --app-runtime=org.fedoraproject.Platform --columns=application | tail -n +1 )
 }
 
+remove_fedora_preinstalled_flatpaks() {
+  echo "Removing Fedora preinstalled flatpaks..."
+  /usr/bin/flatpak remove --system --noninteractive --all ||:
+}
+
 install_flatpaks() {
   echo "Installing flatpaks..."
   # Read list of Flatpaks from /etc/packages.yml and install them
@@ -43,14 +48,17 @@ mark_complete() {
   # Get hash of this script
   hash=$(sha256sum "$0" | cut -d' ' -f1)
   # Write hash to file
-  echo "$hash" > ~/.config/firstboot-complete
+  echo "firstboot: $hash" >> ~/.config/firstboot-complete
+  echo "packages: $packages_hash" >> ~/.config/firstboot-complete
 }
 
 check_if_complete() {
-  # Get hash of this script
+  # Get hash of firstboot script
   hash=$(sha256sum "$0" | cut -d' ' -f1)
-  # Check if hash matches hash in file
-  if [ -f ~/.config/firstboot-complete ] && [ "$hash" == "$(cat ~/.config/firstboot-complete)" ]; then
+  # Get hash of packages.yml
+  packages_hash=$(sha256sum /etc/packages.yml | cut -d' ' -f1)
+  # Check if firstboot has already been run with the same script and packages.yml contents
+  if grep -q "firstboot: $hash" ~/.config/firstboot-complete && grep -q "packages: $packages_hash" ~/.config/firstboot-complete; then
     echo "Firstboot already complete!"
     exit 0
   fi
@@ -62,6 +70,7 @@ main() {
   setup_automatic_flatpak_updates
   setup_flathub
   replace_fedora_flatpaks_with_flathub
+  remove_fedora_preinstalled_flatpaks
   install_flatpaks
   mark_complete
 }

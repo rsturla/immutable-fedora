@@ -8,3 +8,8 @@ update:
   rpm-ostree upgrade
   flatpak update -y
   distrobox upgrade -a
+
+run-firstboot:
+  /usr/libexec/firstboot
+
+setup: run-firstboot update
