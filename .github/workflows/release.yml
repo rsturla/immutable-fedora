@@ -1,7 +1,9 @@
 name: Release
 
 on:
-  pull_request:
+  push:
+    branches:
+      - main
 
 jobs:
   publish-iso:
@@ -20,7 +22,6 @@ jobs:
         shell: bash
         run: |
           dnf install -y gettext
-          # Render the kickstart file from the kickstart.ks.tpl template using envsubst
           cat kickstart.ks.tpl | envsubst > kickstart.ks
           echo "kickstart-file-path=$(pwd)/kickstart.ks" >> $GITHUB_OUTPUT
         env:
@@ -36,12 +37,6 @@ jobs:
           # Currently only the development branch includes support for booting from OCI images
           installer-repo: development
           kickstart-file-path: ${{ steps.generate-kickstart.outputs.kickstart-file-path }}
-
-      - name: DEBUG - Output stuff
-        shell: bash
-        run: |
-          echo "ISO_PATH=${{ steps.generate-iso.outputs.iso-path }}"
-          echo "CHECKSUM_PATH=${{ steps.generate-iso.outputs.checksum-path }}"
 
       - name: Upload ISO to Workflow Artifact
         uses: actions/upload-artifact@v3
