@@ -22,7 +22,7 @@ jobs:
           dnf install -y gettext
           # Render the kickstart file from the kickstart.ks.tpl template using envsubst
           cat kickstart.ks.tpl | envsubst > kickstart.ks
-          echo "KICKSTART_FILE_PATH=$(pwd)/kickstart.ks" >> $GITHUB_ENV
+          echo "KICKSTART_FILE_PATH=$(pwd)/kickstart.ks" >> $GITHUB_OUTPUT
         env:
           IMAGE_OWNER: ${{ github.repository_owner }}
           IMAGE_NAME: silverblue
@@ -35,7 +35,13 @@ jobs:
           filename: silverblue-${{ matrix.fedora-version }}
           # Currently only the development branch includes support for booting from OCI images
           installer-repo: development
-          kickstart-file-path: ${{ env.KICKSTART_FILE_PATH }}
+          kickstart-file-path: ${{ steps.generate-kickstart.outputs.kickstart-file-path }}
+
+      - name: DEBUG - Output stuff
+        shell: bash
+        run: |
+          echo "ISO_PATH=${{ steps.generate-iso.outputs.iso-path }}"
+          echo "CHECKSUM_PATH=${{ steps.generate-iso.outputs.checksum-path }}"
 
       - name: Upload ISO to Workflow Artifact
         uses: actions/upload-artifact@v3
