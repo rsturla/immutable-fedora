@@ -23,8 +23,6 @@ jobs:
           # Render the kickstart file from the kickstart.ks.tpl template using envsubst
           cat kickstart.ks.tpl | envsubst > kickstart.ks
           echo "KICKSTART_FILE_PATH=$(pwd)/kickstart.ks" >> $GITHUB_ENV
-          echo "Generated kickstart file:"
-          cat $KICKSTART_FILE_PATH
         env:
           IMAGE_OWNER: ${{ github.repository_owner }}
           IMAGE_NAME: silverblue

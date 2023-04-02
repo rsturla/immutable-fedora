@@ -35,24 +35,26 @@ runs:
         INSTALLER_URL: https://download.fedoraproject.org/pub/fedora/linux/${{ inputs.installer-repo }}/${{ inputs.installer-major-version }}/Everything/${{ inputs.arch }}/os/images/boot.iso
 
     - name: Generate ISO
+      id: generate-iso
       shell: bash
       run: |
         echo "Generating ISO..."
         mkksiso --ks ${{ inputs.kickstart-file-path }} installer.iso ${{ inputs.filename }}.iso
         # Output the full path to the generated ISO
-        echo "ISO_PATH=$(pwd)/${{ inputs.filename }}.iso" >> $GITHUB_ENV
+        echo "ISO_PATH=$(pwd)/${{ inputs.filename }}.iso" >> $GITHUB_OUTPUT
 
     - name: Generate Checksum
+      id: generate-checksum
       shell: bash
       run: |
         echo "Generating checksum..."
         sha256sum ${{ inputs.filename }}.iso | awk '{print $1}' > ${{ inputs.filename }}.iso.sha256
-        echo "CHECKSUM_PATH=$(pwd)/${{ inputs.filename }}.iso.sha256" >> $GITHUB_ENV
+        echo "CHECKSUM_PATH=$(pwd)/${{ inputs.filename }}.iso.sha256" >> $GITHUB_OUTPUT
 
 outputs:
   iso-path:
     description: 'The path to the generated ISO'
-    value: ${{ env.ISO_PATH }}
+    value: ${{ steps.generate-iso.outputs.iso-path }}
   checksum-path:
     description: 'The path to the generated checksum'
-    value: ${{ env.CHECKSUM_PATH }}
+    value: ${{ steps.generate-checksum.outputs.checksum-path }}
