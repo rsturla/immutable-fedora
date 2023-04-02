@@ -1,10 +1,9 @@
 [org/gnome/shell/extensions/dash-to-dock]
 dock-fixed=false
 force-straight-corner=false
-custom-theme-shring=true
+custom-theme-shrink=true
 disable-overview-on-startup=true
 transparency-mode='DYNAMIC'
-autohide=true
-autohide-in-fullscreen=false
+intellihide-mode='MAXIMIZED_WINDOWS'
 show-delay=0.10
 require-pressure-to-show=false
