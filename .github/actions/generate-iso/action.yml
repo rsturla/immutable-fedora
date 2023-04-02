@@ -5,9 +5,6 @@ inputs:
   filename:
     description: 'The name of the ISO to generate (without the .iso extension)'
     required: true
-  image:
-    description: 'The name of the image to use for the ISO'
-    required: true
   installer-major-version:
     description: 'The major version of the installer to use'
     default: '38'

@@ -31,7 +31,7 @@ jobs:
         uses: ./.github/actions/generate-iso
         id: generate-iso
         with:
-          image-name: silverblue-${{ matrix.fedora-version }}
+          filename: ${{ env.IMAGE_NAME }}-${{ matrix.fedora-version }}
           # Currently only the development branch includes support for booting from OCI images
           installer-repo: development
           kickstart-file-path: ${{ env.KICKSTART_FILE_PATH }}
