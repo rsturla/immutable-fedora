@@ -23,6 +23,8 @@ jobs:
           # Render the kickstart file from the kickstart.ks.tpl template using envsubst
           cat kickstart.ks.tpl | envsubst > kickstart.ks
           echo "KICKSTART_FILE_PATH=$(pwd)/kickstart.ks" >> $GITHUB_ENV
+          echo "Generated kickstart file:"
+          cat $KICKSTART_FILE_PATH
         env:
           IMAGE_OWNER: ${{ github.repository_owner }}
           IMAGE_NAME: silverblue
@@ -32,7 +34,7 @@ jobs:
         uses: ./.github/actions/generate-iso
         id: generate-iso
         with:
-          filename: ${{ env.IMAGE_NAME }}-${{ matrix.fedora-version }}
+          filename: silverblue-${{ matrix.fedora-version }}
           # Currently only the development branch includes support for booting from OCI images
           installer-repo: development
           kickstart-file-path: ${{ env.KICKSTART_FILE_PATH }}
