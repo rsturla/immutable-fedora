@@ -22,7 +22,7 @@ jobs:
           dnf install -y gettext
           # Render the kickstart file from the kickstart.ks.tpl template using envsubst
           cat kickstart.ks.tpl | envsubst > kickstart.ks
-          echo "KICKSTART_FILE_PATH=$(pwd)/kickstart.ks" >> $GITHUB_OUTPUT
+          echo "kickstart-file-path=$(pwd)/kickstart.ks" >> $GITHUB_OUTPUT
         env:
           IMAGE_OWNER: ${{ github.repository_owner }}
           IMAGE_NAME: silverblue
