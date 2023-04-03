@@ -5,8 +5,27 @@ on:
     branches:
       - main
 
+permissions:
+  contents: write
+  checks: write
+  actions: read
+  packages: write
+  pull-requests: write
+
 jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: google-github-actions/release-please-action@v3
+        id: release-please
+        with:
+          release-type: simple
+          package-name: release-please-action
+          changelog-types: '[{"type":"feat","section":"Features","hidden":false},{"type":"fix","section":"Bug Fixes","hidden":false},{"type":"chore","section":"Miscellaneous","hidden":false}]'
+
   publish-iso:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created }}
     runs-on: ubuntu-latest
     container: fedora:latest
     strategy:
@@ -38,11 +57,14 @@ jobs:
           installer-repo: development
           kickstart-file-path: ${{ steps.generate-kickstart.outputs.kickstart-file-path }}
 
-      - name: Upload ISO to Workflow Artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: silverblue-${{ matrix.fedora-version }}
-          path: |
-            ${{ steps.generate-iso.outputs.iso-path }}
-            ${{ steps.generate-iso.outputs.checksum-path }}
-          if-no-files-found: error
+      - name: Upload ISO to Release
+        shell: bash
+        run: |
+          sudo dnf install 'dnf-command(config-manager)' -y
+          sudo dnf config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo
+          sudo dnf install gh -y
+
+          gh release upload ${{ needs.release-please.outputs.tag }} ${{ steps.generate-iso.outputs.iso-path }} -R ${{ github.repository }} --clobber
+          gh release upload ${{ needs.release-please.outputs.tag }} ${{ steps.generate-iso.outputs.checksum-path }} -R ${{ github.repository }} --clobber
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
