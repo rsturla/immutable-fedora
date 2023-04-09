@@ -2,12 +2,14 @@
 
 set -euox pipefail
 
+/usr/bin/sudo -v
+
 # An idempotent firstboot script to install and configure the Fedora Silverblue OS.
 # Most config has already been done in the Containerfile, but this script is required to do some user-level config.
 
 setup_automatic_flatpak_updates() {
   echo "Setting up automatic flatpak updates..."
-  systemctl --user enable --now flatpak-user-update.timer
+  /usr/bin/systemctl --user enable --now flatpak-user-update.timer
 }
 
 setup_flathub() {
@@ -55,16 +57,16 @@ configure_user_groups() {
   # This must be done by appending to /etc/group, as usermod -aG doesn't work on firstboot
   groups=$(jq -r '.userGroups[]' /etc/firstboot/config.json)
   for group in $groups; do
-    echo "TODO: Add user to group $group"
-    grep -E "^$group:" /usr/lib/group >> /etc/group
+    echo "TODO: Add current user to group $group"
+    /usr/bin/grep -E "^$group:" /usr/lib/group | /usr/bin/sudo tee -a /etc/group
   done
 }
 
 mark_complete() {
   echo "Firstboot complete!"
   # Get hash of this script
-  hash=$(sha256sum "$0" | cut -d' ' -f1)
-  packages_hash=$(sha256sum /etc/firstboot/config.json | cut -d' ' -f1)
+  hash=$(/usr/bin/sha256sum "$0" | /usr/bin/cut -d' ' -f1)
+  packages_hash=$(/usr/bin/sha256sum /etc/firstboot/config.json | /usr/bin/cut -d' ' -f1)
   # Write hash to file
   echo "firstboot: $hash" >> ~/.config/firstboot-complete
   echo "packages: $packages_hash" >> ~/.config/firstboot-complete
@@ -72,10 +74,10 @@ mark_complete() {
 
 check_if_complete() {
   # Get hash of firstboot script
-  hash=$(sha256sum "$0" | cut -d' ' -f1)
-  packages_hash=$(sha256sum /etc/firstboot/config.json | cut -d' ' -f1)
+  hash=$(/usr/bin/sha256sum "$0" | /usr/bin/cut -d' ' -f1)
+  packages_hash=$(/usr/bin/sha256sum /etc/firstboot/config.json | /usr/bin/cut -d' ' -f1)
   # Check if firstboot has already been run with the same script and config.json contents
-  if grep -q "firstboot: $hash" ~/.config/firstboot-complete && grep -q "packages: $packages_hash" ~/.config/firstboot-complete; then
+  if /usr/bin/grep -q "firstboot: $hash" ~/.config/firstboot-complete && /usr/bin/grep -q "packages: $packages_hash" ~/.config/firstboot-complete; then
     echo "Firstboot already complete!"
     exit 0
   fi
