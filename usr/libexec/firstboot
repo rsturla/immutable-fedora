@@ -46,8 +46,17 @@ install_rpms() {
   echo "Installing RPMs..."
   # Read list of RPMs from /etc/firstboot/config.json and install them
   rpms=$(jq -r '.rpms[]' /etc/firstboot/config.json)
-  for rpm in $rpms; do
-    /usr/bin/dnf install -y "$rpm"
+  /usr/bin/rpm-ostree install -y "$rpms"
+}
+
+configure_user_groups() {
+  echo "Configuring user groups..."
+  # Read list of groups from /etc/firstboot/config.json and add user to them permanently
+  # This must be done by appending to /etc/group, as usermod -aG doesn't work on firstboot
+  groups=$(jq -r '.userGroups[]' /etc/firstboot/config.json)
+  for group in $groups; do
+    echo "TODO: Add user to group $group"
+    grep -E "^$group:" /usr/lib/group >> /etc/group
   done
 }
 
@@ -55,6 +64,7 @@ mark_complete() {
   echo "Firstboot complete!"
   # Get hash of this script
   hash=$(sha256sum "$0" | cut -d' ' -f1)
+  packages_hash=$(sha256sum /etc/firstboot/config.json | cut -d' ' -f1)
   # Write hash to file
   echo "firstboot: $hash" >> ~/.config/firstboot-complete
   echo "packages: $packages_hash" >> ~/.config/firstboot-complete
@@ -63,9 +73,8 @@ mark_complete() {
 check_if_complete() {
   # Get hash of firstboot script
   hash=$(sha256sum "$0" | cut -d' ' -f1)
-  # Get hash of packages.yml
-  packages_hash=$(sha256sum /etc/packages.yml | cut -d' ' -f1)
-  # Check if firstboot has already been run with the same script and packages.yml contents
+  packages_hash=$(sha256sum /etc/firstboot/config.json | cut -d' ' -f1)
+  # Check if firstboot has already been run with the same script and config.json contents
   if grep -q "firstboot: $hash" ~/.config/firstboot-complete && grep -q "packages: $packages_hash" ~/.config/firstboot-complete; then
     echo "Firstboot already complete!"
     exit 0
@@ -89,6 +98,7 @@ main() {
   remove_fedora_preinstalled_flatpaks
   install_rpms
   install_flatpaks
+  configure_user_groups
   mark_complete
 
   display_message "Firstboot complete! \nPlease reboot to complete the installation." "Firstboot" "info"
