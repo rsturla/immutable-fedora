@@ -1,0 +1,60 @@
+name: Generate ISO
+description: 'Builds an ISO bundled with the provided Kickstart configuration. This must be run on a Fedora system.'
+
+inputs:
+  filename:
+    description: 'The name of the ISO to generate (without the .iso extension)'
+    required: true
+  installer-major-version:
+    description: 'The major version of the installer to use'
+    default: '38'
+  installer-repo:
+    description: 'The name of the installer repository to use'
+    default: 'releases'
+  kickstart-file-path:
+    description: 'The path to the Kickstart file to use'
+    required: true
+  arch:
+    description: 'The architecture to build the ISO for'
+    default: 'x86_64'
+
+runs:
+  using: composite
+  steps:
+    - name: Install dependencies
+      shell: bash
+      run: |
+        dnf install -y curl lorax
+
+    - name: Download installer
+      shell: bash
+      run: |
+        echo "Downloading installer..."
+        curl -L $INSTALLER_URL -o installer.iso
+      env:
+        INSTALLER_URL: https://download.fedoraproject.org/pub/fedora/linux/${{ inputs.installer-repo }}/${{ inputs.installer-major-version }}/Everything/${{ inputs.arch }}/os/images/boot.iso
+
+    - name: Generate ISO
+      id: generate-iso
+      shell: bash
+      run: |
+        echo "Generating ISO..."
+        mkksiso --ks ${{ inputs.kickstart-file-path }} installer.iso ${{ inputs.filename }}.iso
+        # Output the full path to the generated ISO
+        echo "iso-path=$(pwd)/${{ inputs.filename }}.iso" >> $GITHUB_OUTPUT
+
+    - name: Generate Checksum
+      id: generate-checksum
+      shell: bash
+      run: |
+        echo "Generating checksum..."
+        sha256sum ${{ inputs.filename }}.iso | awk '{print $1}' > ${{ inputs.filename }}.iso.sha256
+        echo "checksum-path=$(pwd)/${{ inputs.filename }}.iso.sha256" >> $GITHUB_OUTPUT
+
+outputs:
+  iso-path:
+    description: 'The path to the generated ISO'
+    value: ${{ steps.generate-iso.outputs.iso-path }}
+  checksum-path:
+    description: 'The path to the generated checksum'
+    value: ${{ steps.generate-checksum.outputs.checksum-path }}
