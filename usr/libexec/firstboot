@@ -35,8 +35,8 @@ remove_fedora_preinstalled_flatpaks() {
 
 install_flatpaks() {
   echo "Installing flatpaks..."
-  # Read list of Flatpaks from /etc/firstboot.json and install them
-  flatpaks=$(jq -r '.flatpaks[]' /etc/firstboot.json)
+  # Read list of Flatpaks from /etc/firstboot/config.json and install them
+  flatpaks=$(jq -r '.flatpaks[]' /etc/firstboot/config.json)
   for flatpak in $flatpaks; do
     /usr/bin/flatpak install --user --noninteractive "$flatpak"
   done
@@ -44,8 +44,8 @@ install_flatpaks() {
 
 install_rpms() {
   echo "Installing RPMs..."
-  # Read list of RPMs from /etc/firstboot.json and install them
-  rpms=$(jq -r '.rpms[]' /etc/firstboot.json)
+  # Read list of RPMs from /etc/firstboot/config.json and install them
+  rpms=$(jq -r '.rpms[]' /etc/firstboot/config.json)
   for rpm in $rpms; do
     /usr/bin/dnf install -y "$rpm"
   done
