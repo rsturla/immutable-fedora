@@ -59,7 +59,7 @@ configure_user_groups() {
   for group in $groups; do
     echo "TODO: Add current user to group $group"
     grep -E "^$group:" /usr/lib/group | sudo tee -a /etc/group
-    usermod -aG "$group" "$(whoami)"
+    sudo usermod -aG "$group" "$(whoami)"
   done
 }
 
