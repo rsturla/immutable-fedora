@@ -41,7 +41,7 @@ RUN rpm-ostree override remove \
   just jq \
   libvirt virt-manager \
   chromium \
-  zenity
+  zenity \
   && \
   rm -rf /var/* /tmp/* && \
   ostree container commit
