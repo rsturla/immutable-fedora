@@ -27,7 +27,7 @@ wait_for_network() {
 replace_fedora_flatpaks_with_flathub() {
   echo "Replacing Fedora flatpaks with Flathub flatpaks..."
   flatpak install --user --noninteractive org.gnome.Platform//43
-  flatpak install --user --noninteractive --reinstall flathub "$(flatpak list --app-runtime=org.fedoraproject.Platform --columns=application | tail -n +1 )"
+  flatpak install --user --noninteractive --reinstall flathub $(flatpak list --app-runtime=org.fedoraproject.Platform --columns=application | tail -n +1 )
 }
 
 remove_fedora_preinstalled_flatpaks() {
