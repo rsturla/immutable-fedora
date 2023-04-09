@@ -2,37 +2,37 @@
 
 set -euox pipefail
 
-/usr/bin/sudo -v
+sudo -v
 
 # An idempotent firstboot script to install and configure the Fedora Silverblue OS.
 # Most config has already been done in the Containerfile, but this script is required to do some user-level config.
 
 setup_automatic_flatpak_updates() {
   echo "Setting up automatic flatpak updates..."
-  /usr/bin/systemctl --user enable --now flatpak-user-update.timer
+  systemctl --user enable --now flatpak-user-update.timer
 }
 
 setup_flathub() {
   echo "Removing filtered Flathub repository..."
-  /usr/bin/flatpak remote-delete flathub --force ||:
+  flatpak remote-delete flathub --force ||:
   echo "Adding unfiltered Flathub repository..."
-  /usr/bin/flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+  flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 }
 
 wait_for_network() {
   echo "Waiting for network..."
-  until /usr/bin/ping -q -c 1 flathub.org; do sleep 1; done
+  until ping -q -c 1 flathub.org; do sleep 1; done
 }
 
 replace_fedora_flatpaks_with_flathub() {
   echo "Replacing Fedora flatpaks with Flathub flatpaks..."
-  /usr/bin/flatpak install --user --noninteractive org.gnome.Platform//43
-  /usr/bin/flatpak install --user --noninteractive --reinstall flathub $(flatpak list --app-runtime=org.fedoraproject.Platform --columns=application | tail -n +1 )
+  flatpak install --user --noninteractive org.gnome.Platform//43
+  flatpak install --user --noninteractive --reinstall flathub $(flatpak list --app-runtime=org.fedoraproject.Platform --columns=application | tail -n +1 )
 }
 
 remove_fedora_preinstalled_flatpaks() {
   echo "Removing Fedora preinstalled flatpaks..."
-  /usr/bin/flatpak remove --system --noninteractive --all ||:
+  flatpak remove --system --noninteractive --all ||:
 }
 
 install_flatpaks() {
@@ -40,7 +40,7 @@ install_flatpaks() {
   # Read list of Flatpaks from /etc/firstboot/config.json and install them
   flatpaks=$(jq -r '.flatpaks[]' /etc/firstboot/config.json)
   for flatpak in $flatpaks; do
-    /usr/bin/flatpak install --user --noninteractive "$flatpak"
+    flatpak install --user --noninteractive "$flatpak"
   done
 }
 
@@ -48,7 +48,7 @@ install_rpms() {
   echo "Installing RPMs..."
   # Read list of RPMs from /etc/firstboot/config.json and install them
   rpms=$(jq -r '.rpms[]' /etc/firstboot/config.json)
-  /usr/bin/rpm-ostree install -y "$rpms"
+  rpm-ostree install -y "$rpms"
 }
 
 configure_user_groups() {
@@ -58,15 +58,15 @@ configure_user_groups() {
   groups=$(jq -r '.userGroups[]' /etc/firstboot/config.json)
   for group in $groups; do
     echo "TODO: Add current user to group $group"
-    /usr/bin/grep -E "^$group:" /usr/lib/group | /usr/bin/sudo tee -a /etc/group
+    grep -E "^$group:" /usr/lib/group | sudo tee -a /etc/group
   done
 }
 
 mark_complete() {
   echo "Firstboot complete!"
   # Get hash of this script
-  hash=$(/usr/bin/sha256sum "$0" | /usr/bin/cut -d' ' -f1)
-  packages_hash=$(/usr/bin/sha256sum /etc/firstboot/config.json | /usr/bin/cut -d' ' -f1)
+  hash=$(sha256sum "$0" | cut -d' ' -f1)
+  packages_hash=$(sha256sum /etc/firstboot/config.json | cut -d' ' -f1)
   # Write hash to file
   echo "firstboot: $hash" >> ~/.config/firstboot-complete
   echo "packages: $packages_hash" >> ~/.config/firstboot-complete
@@ -74,10 +74,10 @@ mark_complete() {
 
 check_if_complete() {
   # Get hash of firstboot script
-  hash=$(/usr/bin/sha256sum "$0" | /usr/bin/cut -d' ' -f1)
-  packages_hash=$(/usr/bin/sha256sum /etc/firstboot/config.json | /usr/bin/cut -d' ' -f1)
+  hash=$(sha256sum "$0" | cut -d' ' -f1)
+  packages_hash=$(sha256sum /etc/firstboot/config.json | cut -d' ' -f1)
   # Check if firstboot has already been run with the same script and config.json contents
-  if /usr/bin/grep -q "firstboot: $hash" ~/.config/firstboot-complete && /usr/bin/grep -q "packages: $packages_hash" ~/.config/firstboot-complete; then
+  if grep -q "firstboot: $hash" ~/.config/firstboot-complete && grep -q "packages: $packages_hash" ~/.config/firstboot-complete; then
     echo "Firstboot already complete!"
     exit 0
   fi
@@ -88,7 +88,7 @@ display_message() {
   # $1: message to display
   # $2: title of message box
   # $3: type of message box (info, warning, error)
-  /usr/bin/zenity --"$3" --title="$2" --text="$1"
+  zenity --"$3" --title="$2" --text="$1"
 }
 
 main() {
