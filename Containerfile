@@ -33,7 +33,7 @@ RUN sed -i 's/#AutomaticUpdatePolicy.*/AutomaticUpdatePolicy=stage/' /etc/rpm-os
 # Override default RPMs and install additional ones
 RUN rpm-ostree override remove \
   toolbox \
-  firefox firefox-langpacks\
+  firefox firefox-langpacks \
   && \
   rpm-ostree install \
   distrobox \
@@ -41,7 +41,7 @@ RUN rpm-ostree override remove \
   just jq \
   libvirt virt-manager \
   chromium \
-  zenity \
+  zenity
   && \
   rm -rf /var/* /tmp/* && \
   ostree container commit
@@ -58,7 +58,9 @@ RUN rpm-ostree install \
 
 # Install OpenVPN3
 RUN wget https://copr.fedorainfracloud.org/coprs/dsommers/openvpn3/repo/fedora-$(rpm -E %fedora)/dsommers-openvpn3-fedora-$(rpm -E %fedora).repo -O /etc/yum.repos.d/dsommers-openvpn3-fedora-$(rpm -E %fedora).repo && \
-  rpm-ostree install openvpn3 \
+  rpm-ostree install \
+  openvpn3 \
+  kmod-ovpn-dco \
   && \
   rm -rf /etc/yum.repos.d/dsommers-openvpn3-fedora-$(rpm -E %fedora).repo \
   && \
