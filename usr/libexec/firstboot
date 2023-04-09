@@ -60,7 +60,6 @@ configure_user_groups() {
     if ! grep -q "^$group:" /etc/group; then
       sudo groupadd "$group"
     fi
-    grep -E "^$group:" /usr/lib/group | sudo tee -a /etc/group
     sudo usermod -aG "$group" "$(whoami)"
   done
 }
