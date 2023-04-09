@@ -17,11 +17,8 @@
     "org.gnome.eog",
     "org.gnome.font-viewer"
   ],
-  "rpms": [
-    "1password"
-  ],
+  "rpms": [],
   "userGroups": [
-    "docker",
     "libvirt"
   ]
 }
