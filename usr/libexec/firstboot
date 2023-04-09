@@ -57,7 +57,9 @@ configure_user_groups() {
   # This must be done by appending to /etc/group, as usermod -aG doesn't work on firstboot
   groups=$(jq -r '.userGroups[]' /etc/firstboot/config.json)
   for group in $groups; do
-    echo "TODO: Add current user to group $group"
+    if ! grep -q "^$group:" /etc/group; then
+      sudo groupadd "$group"
+    fi
     grep -E "^$group:" /usr/lib/group | sudo tee -a /etc/group
     sudo usermod -aG "$group" "$(whoami)"
   done
