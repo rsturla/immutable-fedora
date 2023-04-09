@@ -2,6 +2,8 @@
 
 set -euox pipefail
 
+sudo -v
+
 # An idempotent firstboot script to install and configure the Fedora Silverblue OS.
 # Most config has already been done in the Containerfile, but this script is required to do some user-level config.
 
@@ -12,34 +14,53 @@ setup_automatic_flatpak_updates() {
 
 setup_flathub() {
   echo "Removing filtered Flathub repository..."
-  /usr/bin/flatpak remote-delete flathub --force ||:
+  flatpak remote-delete flathub --force ||:
   echo "Adding unfiltered Flathub repository..."
-  /usr/bin/flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+  flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 }
 
 wait_for_network() {
   echo "Waiting for network..."
-  until /usr/bin/ping -q -c 1 flathub.org; do sleep 1; done
+  until ping -q -c 1 flathub.org; do sleep 1; done
 }
 
 replace_fedora_flatpaks_with_flathub() {
   echo "Replacing Fedora flatpaks with Flathub flatpaks..."
-  /usr/bin/flatpak install --user --noninteractive org.gnome.Platform//43
-  /usr/bin/flatpak install --user --noninteractive --reinstall flathub $(flatpak list --app-runtime=org.fedoraproject.Platform --columns=application | tail -n +1 )
+  flatpak install --user --noninteractive org.gnome.Platform//43
+  flatpak install --user --noninteractive --reinstall flathub $(flatpak list --app-runtime=org.fedoraproject.Platform --columns=application | tail -n +1 )
 }
 
 remove_fedora_preinstalled_flatpaks() {
   echo "Removing Fedora preinstalled flatpaks..."
-  /usr/bin/flatpak remove --system --noninteractive --all ||:
+  flatpak remove --system --noninteractive --all ||:
 }
 
 install_flatpaks() {
   echo "Installing flatpaks..."
-  # Read list of Flatpaks from /etc/packages.yml and install them
-  flatpaks=$(yq e '.flatpaks[] | .name' /etc/packages.yml)
+  # Read list of Flatpaks from /etc/firstboot/config.json and install them
+  flatpaks=$(jq -r '.flatpaks[]' /etc/firstboot/config.json)
   for flatpak in $flatpaks; do
-    echo "Installing $flatpak..."
-    /usr/bin/flatpak install --user --noninteractive flathub "$flatpak"
+    flatpak install --user --noninteractive "$flatpak"
+  done
+}
+
+install_rpms() {
+  echo "Installing RPMs..."
+  # Read list of RPMs from /etc/firstboot/config.json and install them
+  rpms=$(jq -r '.rpms[]' /etc/firstboot/config.json)
+  rpm-ostree install --idempotent -y "$rpms"
+}
+
+configure_user_groups() {
+  echo "Configuring user groups..."
+  # Read list of groups from /etc/firstboot/config.json and add user to them permanently
+  # This must be done by appending to /etc/group, as usermod -aG doesn't work on firstboot
+  groups=$(jq -r '.userGroups[]' /etc/firstboot/config.json)
+  for group in $groups; do
+    if ! grep -q "^$group:" /etc/group; then
+      sudo groupadd "$group"
+    fi
+    sudo usermod -aG "$group" "$(whoami)"
   done
 }
 
@@ -47,6 +68,7 @@ mark_complete() {
   echo "Firstboot complete!"
   # Get hash of this script
   hash=$(sha256sum "$0" | cut -d' ' -f1)
+  packages_hash=$(sha256sum /etc/firstboot/config.json | cut -d' ' -f1)
   # Write hash to file
   echo "firstboot: $hash" >> ~/.config/firstboot-complete
   echo "packages: $packages_hash" >> ~/.config/firstboot-complete
@@ -55,13 +77,20 @@ mark_complete() {
 check_if_complete() {
   # Get hash of firstboot script
   hash=$(sha256sum "$0" | cut -d' ' -f1)
-  # Get hash of packages.yml
-  packages_hash=$(sha256sum /etc/packages.yml | cut -d' ' -f1)
-  # Check if firstboot has already been run with the same script and packages.yml contents
+  packages_hash=$(sha256sum /etc/firstboot/config.json | cut -d' ' -f1)
+  # Check if firstboot has already been run with the same script and config.json contents
   if grep -q "firstboot: $hash" ~/.config/firstboot-complete && grep -q "packages: $packages_hash" ~/.config/firstboot-complete; then
     echo "Firstboot already complete!"
     exit 0
   fi
+}
+
+display_message() {
+  # Display a GUI message to the user
+  # $1: message to display
+  # $2: title of message box
+  # $3: type of message box (info, warning, error)
+  zenity --"$3" --title="$2" --text="$1"
 }
 
 main() {
@@ -71,8 +100,12 @@ main() {
   setup_flathub
   replace_fedora_flatpaks_with_flathub
   remove_fedora_preinstalled_flatpaks
+  install_rpms
   install_flatpaks
+  configure_user_groups
   mark_complete
+
+  display_message "Firstboot complete! \nPlease reboot to complete the installation." "Firstboot" "info"
 }
 
 main

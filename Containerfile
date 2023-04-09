@@ -32,16 +32,16 @@ RUN sed -i 's/#AutomaticUpdatePolicy.*/AutomaticUpdatePolicy=stage/' /etc/rpm-os
 
 # Override default RPMs and install additional ones
 RUN rpm-ostree override remove \
-  toolbox firefox firefox-langpacks && \
+  toolbox \
+  firefox firefox-langpacks \
+  && \
   rpm-ostree install \
   distrobox \
   gnome-tweaks \
-  just \
+  just jq \
   libvirt virt-manager \
   chromium \
-  && \
-  wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq && \
-  chmod +x /usr/bin/yq \
+  zenity \
   && \
   rm -rf /var/* /tmp/* && \
   ostree container commit
