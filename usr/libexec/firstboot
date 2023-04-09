@@ -35,11 +35,19 @@ remove_fedora_preinstalled_flatpaks() {
 
 install_flatpaks() {
   echo "Installing flatpaks..."
-  # Read list of Flatpaks from /etc/packages.yml and install them
-  flatpaks=$(yq e '.flatpaks[] | .name' /etc/packages.yml)
+  # Read list of Flatpaks from /etc/firstboot.json and install them
+  flatpaks=$(jq -r '.flatpaks[]' /etc/firstboot.json)
   for flatpak in $flatpaks; do
-    echo "Installing $flatpak..."
-    /usr/bin/flatpak install --user --noninteractive flathub "$flatpak"
+    /usr/bin/flatpak install --user --noninteractive "$flatpak"
+  done
+}
+
+install_rpms() {
+  echo "Installing RPMs..."
+  # Read list of RPMs from /etc/firstboot.json and install them
+  rpms=$(jq -r '.rpms[]' /etc/firstboot.json)
+  for rpm in $rpms; do
+    /usr/bin/dnf install -y "$rpm"
   done
 }
 
@@ -64,6 +72,14 @@ check_if_complete() {
   fi
 }
 
+display_message() {
+  # Display a GUI message to the user
+  # $1: message to display
+  # $2: title of message box
+  # $3: type of message box (info, warning, error)
+  /usr/bin/zenity --"$3" --title="$2" --text="$1"
+}
+
 main() {
   check_if_complete
   wait_for_network
@@ -71,8 +87,11 @@ main() {
   setup_flathub
   replace_fedora_flatpaks_with_flathub
   remove_fedora_preinstalled_flatpaks
+  install_rpms
   install_flatpaks
   mark_complete
+
+  display_message "Firstboot complete! \nPlease reboot to complete the installation." "Firstboot" "info"
 }
 
 main
