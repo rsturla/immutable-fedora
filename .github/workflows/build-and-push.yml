@@ -2,7 +2,7 @@ name: Build and Push OCI Image
 
 on:
   schedule:
-    - cron: '0 0,12 * * *' # Twice daily
+    - cron: "0 0,12 * * *" # Twice daily
   push:
     branches:
       - main
@@ -20,8 +20,9 @@ jobs:
       packages: write
       id-token: write
     strategy:
+      fail-fast: false
       matrix:
-        fedora-version: [ 37, 38 ]
+        fedora-version: [37, 38]
         include:
           - fedora-version: 37
             is-stable: true
