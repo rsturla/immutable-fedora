@@ -69,6 +69,8 @@ RUN if [ "$FEDORA_MAJOR_VERSION" != "37" ]; then exit 0; fi \
   && \
   rm -f /etc/yum.repos.d/docker-ce.repo \
   && \
+  systemctl enable docker.service \
+  && \
   rm -rf /var/* /tmp/* && \
   ostree container commit
 
