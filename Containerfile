@@ -1,5 +1,7 @@
-ARG FEDORA_MAJOR_VERSION=37
+ARG FEDORA_MAJOR_VERSION=38
 FROM quay.io/fedora-ostree-desktops/silverblue:${FEDORA_MAJOR_VERSION} AS final
+
+ARG FEDORA_MAJOR_VERSION
 
 COPY usr /usr
 COPY etc /etc
@@ -54,8 +56,10 @@ RUN wget https://copr.fedorainfracloud.org/coprs/dsommers/openvpn3/repo/fedora-$
   rm -rf /var/* /tmp/* && \
   ostree container commit
 
-# Install Docker
-RUN wget https://download.docker.com/linux/fedora/docker-ce.repo -O /etc/yum.repos.d/docker-ce.repo && \
+# Install Docker if Fedora 37 since it's not yet available on Fedora 38
+RUN if [ "$FEDORA_MAJOR_VERSION" != "37" ]; then exit 0; fi \
+  && \
+  wget https://download.docker.com/linux/fedora/docker-ce.repo -O /etc/yum.repos.d/docker-ce.repo && \
   rpm-ostree install \
   docker-ce \
   docker-ce-cli \
@@ -73,15 +77,6 @@ RUN rpm-ostree install \
   code \
   && \
   rm -f /etc/yum.repos.d/vscode.repo \
-  && \
-  rm -rf /var/* /tmp/* && \
-  ostree container commit
-
-# Install Google Chrome
-RUN rpm-ostree install \
-  google-chrome-stable \
-  && \
-  rm -f /etc/yum.repos.d/google-chrome.repo \
   && \
   rm -rf /var/* /tmp/* && \
   ostree container commit
