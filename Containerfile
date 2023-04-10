@@ -4,19 +4,6 @@ FROM quay.io/fedora-ostree-desktops/silverblue:${FEDORA_MAJOR_VERSION} AS final
 COPY usr /usr
 COPY etc /etc
 
-# Install RPM Fusion repositories
-RUN rpm-ostree install \
-  https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
-  https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm && \
-  rpm-ostree install \
-  rpmfusion-nonfree-release  \
-  rpmfusion-free-release  \
-  --uninstall=rpmfusion-free-release-$(rpm -E %fedora)-1.noarch  \
-  --uninstall=rpmfusion-nonfree-release-$(rpm -E %fedora)-1.noarch \
-  && \
-  rm -rf /var/* /tmp/* && \
-  ostree container commit
-
 # Configure systemd services
 RUN sed -i 's/#AutomaticUpdatePolicy.*/AutomaticUpdatePolicy=stage/' /etc/rpm-ostreed.conf  && \
   systemctl enable rpm-ostreed-automatic.timer && \
@@ -67,13 +54,16 @@ RUN wget https://copr.fedorainfracloud.org/coprs/dsommers/openvpn3/repo/fedora-$
   rm -rf /var/* /tmp/* && \
   ostree container commit
 
-# Install Docker
-RUN rpm-ostree install \
+# Install Docker
+RUN wget https://download.docker.com/linux/fedora/docker-ce.repo -O /etc/yum.repos.d/docker-ce.repo && \
+  rpm-ostree install \
   docker-ce \
   docker-ce-cli \
   containerd.io \
   docker-buildx-plugin \
   docker-compose-plugin \
+  && \
+  rm -f /etc/yum.repos.d/docker-ce.repo \
   && \
   rm -rf /var/* /tmp/* && \
   ostree container commit
@@ -81,6 +71,17 @@ RUN rpm-ostree install \
 # Install Visual Studio Code
 RUN rpm-ostree install \
   code \
+  && \
+  rm -f /etc/yum.repos.d/vscode.repo \
+  && \
+  rm -rf /var/* /tmp/* && \
+  ostree container commit
+
+# Install Google Chrome
+RUN rpm-ostree install \
+  google-chrome-stable \
+  && \
+  rm -f /etc/yum.repos.d/google-chrome.repo \
   && \
   rm -rf /var/* /tmp/* && \
   ostree container commit
