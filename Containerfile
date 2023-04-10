@@ -1,4 +1,4 @@
-ARG FEDORA_MAJOR_VERSION=38
+ARG FEDORA_MAJOR_VERSION=37
 FROM quay.io/fedora-ostree-desktops/silverblue:${FEDORA_MAJOR_VERSION} AS final
 
 ARG FEDORA_MAJOR_VERSION
@@ -31,6 +31,7 @@ RUN rpm-ostree override remove \
   libvirt virt-manager \
   chromium \
   zenity \
+  podman-docker \
   && \
   rm -rf /var/* /tmp/* && \
   ostree container commit
@@ -52,24 +53,6 @@ RUN wget https://copr.fedorainfracloud.org/coprs/dsommers/openvpn3/repo/fedora-$
   kmod-ovpn-dco \
   && \
   rm -rf /etc/yum.repos.d/dsommers-openvpn3-fedora-$(rpm -E %fedora).repo \
-  && \
-  rm -rf /var/* /tmp/* && \
-  ostree container commit
-
-# Install Docker if Fedora 37 since it's not yet available on Fedora 38
-RUN if [ "$FEDORA_MAJOR_VERSION" != "37" ]; then exit 0; fi \
-  && \
-  wget https://download.docker.com/linux/fedora/docker-ce.repo -O /etc/yum.repos.d/docker-ce.repo && \
-  rpm-ostree install \
-  docker-ce \
-  docker-ce-cli \
-  containerd.io \
-  docker-buildx-plugin \
-  docker-compose-plugin \
-  && \
-  rm -f /etc/yum.repos.d/docker-ce.repo \
-  && \
-  systemctl enable docker.service \
   && \
   rm -rf /var/* /tmp/* && \
   ostree container commit
