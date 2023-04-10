@@ -66,3 +66,21 @@ RUN wget https://copr.fedorainfracloud.org/coprs/dsommers/openvpn3/repo/fedora-$
   && \
   rm -rf /var/* /tmp/* && \
   ostree container commit
+
+# Install Docker
+RUN rpm-ostree install \
+  docker-ce \
+  docker-ce-cli \
+  containerd.io \
+  docker-buildx-plugin \
+  docker-compose-plugin \
+  && \
+  rm -rf /var/* /tmp/* && \
+  ostree container commit
+
+# Install Visual Studio Code
+RUN rpm-ostree install \
+  code \
+  && \
+  rm -rf /var/* /tmp/* && \
+  ostree container commit

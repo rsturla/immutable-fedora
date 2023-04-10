@@ -19,6 +19,7 @@
   ],
   "rpms": [],
   "userGroups": [
+    "docker",
     "libvirt"
   ]
 }
