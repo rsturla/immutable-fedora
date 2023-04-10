@@ -33,6 +33,8 @@ RUN rpm-ostree override remove \
   zenity \
   podman-docker \
   && \
+  touch /etc/containers/nodocker \
+  && \
   rm -rf /var/* /tmp/* && \
   ostree container commit
 
