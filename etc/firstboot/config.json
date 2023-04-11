@@ -21,7 +21,6 @@
     "1password"
   ],
   "userGroups": [
-    "docker",
     "libvirt"
   ]
 }
