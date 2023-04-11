@@ -48,6 +48,18 @@ RUN rpm-ostree install \
   rm -rf /var/* /tmp/* && \
   ostree container commit
 
+# Install ClamAV
+RUN rpm-ostree install \
+  clamav \
+  clamav-update \
+  clamtk \
+  clamtk-gnome \
+  && \
+  systemctl enable clamav-freshclam.service \
+  && \
+  rm -rf /var/* /tmp/* && \
+  ostree container commit
+
 # Install OpenVPN3
 RUN wget https://copr.fedorainfracloud.org/coprs/dsommers/openvpn3/repo/fedora-$(rpm -E %fedora)/dsommers-openvpn3-fedora-$(rpm -E %fedora).repo -O /etc/yum.repos.d/dsommers-openvpn3-fedora-$(rpm -E %fedora).repo && \
   rpm-ostree install \
