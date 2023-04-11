@@ -52,10 +52,6 @@ RUN rpm-ostree install \
 RUN rpm-ostree install \
   clamav \
   clamav-update \
-  clamd \
-  && \
-  systemctl enable clamav-freshclam.service && \
-  systemctl enable clamd@scan.service \
   && \
   rm -rf /var/* /tmp/* && \
   ostree container commit
