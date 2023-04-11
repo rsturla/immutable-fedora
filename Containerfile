@@ -52,8 +52,6 @@ RUN rpm-ostree install \
 RUN rpm-ostree install \
   clamav \
   clamav-update \
-  clamtk \
-  clamtk-gnome \
   && \
   systemctl enable clamav-freshclam.service \
   && \
