@@ -1,15 +1,20 @@
 ARG FEDORA_MAJOR_VERSION=37
+ARG BASE_IMAGE_NAME=ghcr.io/rsturla/silverblue
+ARG BASE_IMAGE_TAG=37
+ARG NVIDIA_MAJOR_VERSION="${NVIDIA_MAJOR_VERSION:-530}"
+
+ARG BASE_IMAGE=ghcr.io/rsturla/silverblue
+
 FROM quay.io/fedora-ostree-desktops/silverblue:${FEDORA_MAJOR_VERSION} AS builder
 
-ARG NVIDIA_MAJOR_VERSION="${NVIDIA_MAJOR_VERSION:-530}"
 ARG FEDORA_MAJOR_VERSION
+ARG NVIDIA_MAJOR_VERSION
 
 COPY justfile /tmp/build/nvidia-just/justfile
 COPY build.sh /tmp/build.sh
-
-ADD certs /tmp/certs
-
-ADD nvidia-addons.spec /tmp/nvidia-addons/nvidia-addons.spec
+COPY certs /tmp/certs
+COPY nvidia-addons.spec /tmp/nvidia-addons/nvidia-addons.spec
+COPY etc/nvidia-container-runtime/config-rootless.toml /tmp/nvidia-addons/rpmbuild/SOURCES/config-rootless.toml
 
 ADD https://nvidia.github.io/nvidia-docker/rhel9.0/nvidia-docker.repo \
   /tmp/nvidia-addons/rpmbuild/SOURCES/nvidia-container-runtime.repo
@@ -17,13 +22,9 @@ ADD https://nvidia.github.io/nvidia-docker/rhel9.0/nvidia-docker.repo \
 ADD https://nvidia.github.io/nvidia-docker/rhel9.0/nvidia-docker.repo \
   /etc/yum.repos.d/nvidia-container-runtime.repo
 
-ADD etc/nvidia-container-runtime/config-rootless.toml \
-  /tmp/nvidia-addons/rpmbuild/SOURCES/config-rootless.toml
-
 ADD https://raw.githubusercontent.com/NVIDIA/dgx-selinux/master/bin/RHEL9/nvidia-container.pp \
   /tmp/nvidia-addons/rpmbuild/SOURCES/nvidia-container.pp
 
-ADD etc/sway/environment /tmp/nvidia-addons/rpmbuild/SOURCES/environment
 
 RUN rpm-ostree install \
   https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
@@ -37,3 +38,30 @@ RUN rpm-ostree install \
 RUN /tmp/build.sh
 
 RUN rpm -ql /tmp/nvidia-addons/rpmbuild/RPMS/*/*.rpm
+
+
+FROM ${BASE_IMAGE}:${FEDORA_MAJOR_VERSION}
+
+ARG FEDORA_MAJOR_VERSION
+ARG NVIDIA_MAJOR_VERSION
+
+
+COPY --from=builder /var/cache /var/cache
+COPY --from=builder /tmp/nvidia-addons /tmp/nvidia-addons
+
+COPY install.sh /tmp/install.sh
+COPY post-install.sh /tmp/post-install.sh
+
+RUN rpm-ostree install \
+  https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
+  https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm && \
+  rpm-ostree install \
+  rpmfusion-nonfree-release  \
+  rpmfusion-free-release  \
+  --uninstall=rpmfusion-free-release-$(rpm -E %fedora)-1.noarch  \
+  --uninstall=rpmfusion-nonfree-release-$(rpm -E %fedora)-1.noarch
+
+RUN /tmp/install.sh
+RUN /tmp/post-install.sh
+RUN rm -rf /tmp/* /var/* && \
+  ostree container commit
