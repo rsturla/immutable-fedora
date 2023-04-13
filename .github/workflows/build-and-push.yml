@@ -28,7 +28,6 @@ jobs:
             is-stable: true
           - fedora-version: 38
             is-latest: true
-
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -70,9 +69,10 @@ jobs:
         id: build
         with:
           containerfiles: |
-            ./Containerfile
+            ./base/Containerfile
           image: ${{ env.BASE_IMAGE }}
           tags: ${{ env.TAGS }}
+          context: ./base
           build-args: |
             FEDORA_MAJOR_VERSION=${{ matrix.fedora-version }}
 
