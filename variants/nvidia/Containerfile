@@ -65,7 +65,7 @@ RUN /tmp/install.sh
 RUN /tmp/post-install.sh
 
 # nvidia-power is not needed on GPUs newer than 2000 series, so disable it by default
-RUN systemctl disable nvidia-power \
+RUN systemctl disable nvidia-powerd.service \
   && \
   rm -rf /tmp/* /var/* && \
   ostree container commit
