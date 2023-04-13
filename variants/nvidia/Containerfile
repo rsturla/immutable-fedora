@@ -1,7 +1,7 @@
 ARG FEDORA_MAJOR_VERSION=37
-ARG BASE_IMAGE_NAME=ghcr.io/rsturla/silverblue
 ARG BASE_IMAGE_TAG=37
 ARG NVIDIA_MAJOR_VERSION="${NVIDIA_MAJOR_VERSION:-530}"
+ARG BASE_IMAGE=ghcr.io/rsturla/silverblue
 
 FROM quay.io/fedora-ostree-desktops/silverblue:${FEDORA_MAJOR_VERSION} AS builder
 
@@ -37,7 +37,7 @@ RUN /tmp/build.sh
 RUN rpm -ql /tmp/nvidia-addons/rpmbuild/RPMS/*/*.rpm
 
 
-FROM ${BASE_IMAGE_NAME}:${BASE_IMAGE_TAG}
+FROM ${BASE_IMAGE}:${BASE_IMAGE_TAG}
 
 ARG FEDORA_MAJOR_VERSION
 ARG NVIDIA_MAJOR_VERSION
