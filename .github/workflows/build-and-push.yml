@@ -7,6 +7,7 @@ on:
     branches:
       - main
   pull_request:
+  workflow_dispatch:
 
 env:
   BASE_IMAGE: silverblue
@@ -19,6 +20,7 @@ jobs:
       contents: read
       packages: write
       id-token: write
+
     strategy:
       fail-fast: false
       matrix:
@@ -28,6 +30,7 @@ jobs:
             is-stable: true
           - fedora-version: 38
             is-latest: true
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -68,7 +71,7 @@ jobs:
       - name: Generate Tags (Pull Request)
         if: github.event_name == 'pull_request'
         run: |
-          PR_TAG="pr-${{ github.event.pull_request.number }}-${{ matrix.fedora-version }}"
+          PR_TAG="pr${{ github.event.pull_request.number }}-${{ matrix.fedora-version }}"
           SHA_TAG="${GITHUB_SHA::8}-${{ matrix.fedora-version }}"
 
           DEFAULT_TAGS+=(
@@ -99,25 +102,27 @@ jobs:
           registry: ${{ env.IMAGE_REGISTRY }}
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-    outputs:
-      image: ${{ steps.build.outputs.image }}
 
-  nvidia:
+
+  variants:
     runs-on: ubuntu-latest
     needs: base
     permissions:
       contents: read
       packages: write
       id-token: write
+
     strategy:
       fail-fast: false
       matrix:
         fedora-version: [37, 38]
+        variant: [nvidia]
         include:
           - fedora-version: 37
             is-stable: true
           - fedora-version: 38
             is-latest: true
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -128,22 +133,22 @@ jobs:
           DEFAULT_TAGS=()
 
           # Add :<version> tag - e.g. :37
-          MAJOR_VERSION_TAG="${{ matrix.fedora-version }}-nvidia"
+          MAJOR_VERSION_TAG="${{ matrix.fedora-version }}-${{ matrix.variant}}"
 
           # Add date tag - e.g. :20230101000000-<version>
-          DATE_TAG="$(date -u +%Y%m%d%H%M%S)-${{ matrix.fedora-version }}-nvidia"
+          DATE_TAG="$(date -u +%Y%m%d%H%M%S)-${{ matrix.fedora-version }}-${{ matrix.variant}}"
 
           # Add short SHA tag - e.g. :abcdef-<version>
-          SHA_TAG="${GITHUB_SHA::8}-${{ matrix.fedora-version }}-nvidia"
+          SHA_TAG="${GITHUB_SHA::8}-${{ matrix.fedora-version }}-${{ matrix.variant}}"
 
           # Add :latest tag if this is the latest Fedora version (inc. pre-releases)
           if [ "${{ matrix.is-latest }}" = "true" ]; then
-            DEFAULT_TAGS+=("latest-nvidia")
+            DEFAULT_TAGS+=("latest-${{ matrix.variant}}")
           fi
 
           # Add :stable tag if this is the latest stable Fedora version
           if [ "${{ matrix.is-stable }}" = "true" ]; then
-            DEFAULT_TAGS+=("stable-nvidia")
+            DEFAULT_TAGS+=("stable-${{ matrix.variant}}")
           fi
 
           DEFAULT_TAGS+=(
@@ -158,8 +163,8 @@ jobs:
       - name: Generate Tags (Pull Request)
         if: github.event_name == 'pull_request'
         run: |
-          PR_TAG="pr-${{ github.event.pull_request.number }}-${{ matrix.fedora-version }}-nvidia"
-          SHA_TAG="${GITHUB_SHA::8}-${{ matrix.fedora-version }}-nvidia"
+          PR_TAG="pr${{ github.event.pull_request.number }}-${{ matrix.fedora-version }}-${{ matrix.variant}}"
+          SHA_TAG="${GITHUB_SHA::8}-${{ matrix.fedora-version }}-${{ matrix.variant}}"
 
           DEFAULT_TAGS+=(
             "${PR_TAG}"
@@ -168,44 +173,33 @@ jobs:
           echo "TAGS=${DEFAULT_TAGS[*]}" >> $GITHUB_ENV
           echo "SHA_TAG=${SHA_TAG}" >> $GITHUB_ENV
 
-      - name: Build Image (Pull Request)
-        uses: redhat-actions/buildah-build@v2
-        if: github.event_name == 'pull_request'
-        id: build-pr
-        with:
-          containerfiles: |
-            ./variants/nvidia/Containerfile
-          image: ${{ env.BASE_IMAGE }}-nvidia
-          tags: ${{ env.TAGS }}
-          context: ./variants/nvidia
-          build-args: |
-            FEDORA_MAJOR_VERSION=${{ matrix.fedora-version }}
-            BASE_IMAGE_TAG=pr-${{ github.event.pull_request.number }}-${{ matrix.fedora-version }}
-
       - name: Build Image
         uses: redhat-actions/buildah-build@v2
         if: github.event_name != 'pull_request'
         id: build
         with:
           containerfiles: |
-            ./variants/nvidia/Containerfile
-          image: ${{ env.BASE_IMAGE }}-nvidia
+            ./variants/${{ matrix.variant}}/Containerfile
+          image: ${{ env.BASE_IMAGE }}
           tags: ${{ env.TAGS }}
-          context: ./variants/nvidia
+          context: ./variants/${{ matrix.variant}}
           build-args: |
             FEDORA_MAJOR_VERSION=${{ matrix.fedora-version }}
             BASE_IMAGE_TAG=${{ matrix.fedora-version }}
 
-      - name: Push to Registry (Pull Request)
-        uses: redhat-actions/push-to-registry@v2
+      - name: Build Image (Pull Request)
+        uses: redhat-actions/buildah-build@v2
         if: github.event_name == 'pull_request'
-        id: push-pr
+        id: build-pr
         with:
-          image: ${{ steps.build-pr.outputs.image }}
-          tags: ${{ steps.build-pr.outputs.tags }}
-          registry: ${{ env.IMAGE_REGISTRY }}
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          containerfiles: |
+            ./variants/${{ matrix.variant}}/Containerfile
+          image: ${{ env.BASE_IMAGE }}
+          tags: ${{ env.TAGS }}
+          context: ./variants/${{ matrix.variant}}
+          build-args: |
+            FEDORA_MAJOR_VERSION=${{ matrix.fedora-version }}
+            BASE_IMAGE_TAG=pr${{ github.event.pull_request.number }}-${{ matrix.fedora-version }}
 
       - name: Push to Registry
         uses: redhat-actions/push-to-registry@v2
@@ -214,6 +208,17 @@ jobs:
         with:
           image: ${{ steps.build.outputs.image }}
           tags: ${{ steps.build.outputs.tags }}
+          registry: ${{ env.IMAGE_REGISTRY }}
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push to Registry (Pull Request)
+        uses: redhat-actions/push-to-registry@v2
+        if: github.event_name == 'pull_request'
+        id: push-pr
+        with:
+          image: ${{ steps.build-pr.outputs.image }}
+          tags: ${{ steps.build-pr.outputs.tags }}
           registry: ${{ env.IMAGE_REGISTRY }}
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
