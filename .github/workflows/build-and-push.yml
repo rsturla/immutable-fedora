@@ -201,7 +201,7 @@ jobs:
       - name: Push to Registry (Pull Request)
         uses: redhat-actions/push-to-registry@v2
         if: github.event_name == 'pull_request'
-        id: push
+        id: push-pr
         with:
           image: ${{ steps.build-pr.outputs.image }}
           tags: ${{ steps.build-pr.outputs.tags }}
