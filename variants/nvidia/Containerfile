@@ -3,8 +3,6 @@ ARG BASE_IMAGE_NAME=ghcr.io/rsturla/silverblue
 ARG BASE_IMAGE_TAG=37
 ARG NVIDIA_MAJOR_VERSION="${NVIDIA_MAJOR_VERSION:-530}"
 
-ARG BASE_IMAGE=ghcr.io/rsturla/silverblue
-
 FROM quay.io/fedora-ostree-desktops/silverblue:${FEDORA_MAJOR_VERSION} AS builder
 
 ARG FEDORA_MAJOR_VERSION
@@ -40,7 +38,7 @@ RUN /tmp/build.sh
 RUN rpm -ql /tmp/nvidia-addons/rpmbuild/RPMS/*/*.rpm
 
 
-FROM quay.io/fedora-ostree-desktops/silverblue:${FEDORA_MAJOR_VERSION}
+FROM ${BASE_IMAGE}:${FEDORA_MAJOR_VERSION}
 
 ARG FEDORA_MAJOR_VERSION
 ARG NVIDIA_MAJOR_VERSION
@@ -66,6 +64,13 @@ RUN /tmp/post-install.sh
 
 # nvidia-power is not needed on GPUs newer than 2000 series, so disable it by default
 RUN systemctl disable nvidia-powerd.service \
+  && \
+  rm -rf /tmp/* /var/* && \
+  ostree container commit
+
+RUN rpm-ostree override remove \
+  rpmfusion-nonfree-release  \
+  rpmfusion-free-release \
   && \
   rm -rf /tmp/* /var/* && \
   ostree container commit
