@@ -15,7 +15,8 @@
     "org.gnome.baobab",
     "org.gnome.clocks",
     "org.gnome.eog",
-    "org.gnome.font-viewer"
+    "org.gnome.font-viewer",
+    "io.podman_desktop.PodmanDesktop"
   ],
   "rpms": [
     "1password"
