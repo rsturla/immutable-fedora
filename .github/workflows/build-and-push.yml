@@ -174,10 +174,10 @@ jobs:
         id: build-pr
         with:
           containerfiles: |
-            ./nvidia/Containerfile
+            ./variants/nvidia/Containerfile
           image: ${{ env.BASE_IMAGE }}-nvidia
           tags: ${{ env.TAGS }}
-          context: ./nvidia
+          context: ./variants/nvidia
           build-args: |
             FEDORA_MAJOR_VERSION=${{ matrix.fedora-version }}
             BASE_IMAGE_NAME=${{ needs.base.outputs.image }}
@@ -189,10 +189,10 @@ jobs:
         id: build
         with:
           containerfiles: |
-            ./nvidia/Containerfile
+            ./variants/nvidia/Containerfile
           image: ${{ env.BASE_IMAGE }}-nvidia
           tags: ${{ env.TAGS }}
-          context: ./nvidia
+          context: ./variants/nvidia
           build-args: |
             FEDORA_MAJOR_VERSION=${{ matrix.fedora-version }}
             BASE_IMAGE_NAME=${{ needs.base.outputs.image }}
