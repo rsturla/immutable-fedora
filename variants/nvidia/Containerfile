@@ -69,10 +69,3 @@ RUN systemctl disable nvidia-powerd.service \
   && \
   rm -rf /tmp/* /var/* && \
   ostree container commit
-
-RUN rpm-ostree override remove \
-  rpmfusion-nonfree-release  \
-  rpmfusion-free-release \
-  && \
-  rm -rf /tmp/* /var/* && \
-  ostree container commit
