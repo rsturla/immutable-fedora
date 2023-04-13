@@ -4,7 +4,6 @@ Release:        1%{?dist}
 Summary:        Additional files for nvidia driver support
 
 License:        MIT
-URL:            https://github.com/ublue-os/nvidia
 
 BuildArch:      noarch
 Supplements:    mokutil policycoreutils
@@ -44,20 +43,3 @@ install -Dm0644 %{buildroot}%{_datadir}/nvidia/%{_datadir}/selinux/packages/nvid
 %attr(0644,root,root) %{_sysconfdir}/yum.repos.d/nvidia-container-runtime.repo
 %attr(0644,root,root) %{_sysconfdir}/nvidia-container-runtime/config-rootless.toml
 %attr(0644,root,root) %{_datadir}/selinux/packages/nvidia-container.pp
-
-%changelog
-* Sun Mar 26 2023 Joshua Stone <joshua.gage.stone@gmail.com> - 0.4
-- Add asus-linux COPR
-
-* Fri Feb 24 2023 Joshua Stone <joshua.gage.stone@gmail.com> - 0.3
-- Add sway environment file
-- Put ublue-os modifications into a separate data directory
-
-* Thu Feb 16 2023 Joshua Stone <joshua.gage.stone@gmail.com> - 0.2
-- Add nvidia-container-runtime repo
-- Add nvidia-container-runtime selinux policy file
-- Re-purpose into a general-purpose add-on package
-- Update URL to point to ublue-os project
-
-* Fri Feb 03 2023 Joshua Stone <joshua.gage.stone@gmail.com> - 0.1
-- Add key for enrolling kernel modules in alpha builds
