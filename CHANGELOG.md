@@ -1,5 +1,34 @@
 # Changelog
 
+## [1.2.0](https://github.com/rsturla/immutable-fedora/compare/v1.1.0...v1.2.0) (2023-04-14)
+
+
+### Features
+
+* Add useful yum repositories ([#25](https://github.com/rsturla/immutable-fedora/issues/25)) ([6d45986](https://github.com/rsturla/immutable-fedora/commit/6d459868baeabe10a7a5b349c2a5d979d043e6d3))
+* Create NVIDIA variant ([#36](https://github.com/rsturla/immutable-fedora/issues/36)) ([4ec8da7](https://github.com/rsturla/immutable-fedora/commit/4ec8da7dfe8dd19d1d3b3495d5de310c4c2ee6ac))
+* Install clamav antivirus software ([#32](https://github.com/rsturla/immutable-fedora/issues/32)) ([92d637b](https://github.com/rsturla/immutable-fedora/commit/92d637b7a9be42cbebc52fee0a71b3c47e1a401e))
+* Install development tools ([#28](https://github.com/rsturla/immutable-fedora/issues/28)) ([964fb38](https://github.com/rsturla/immutable-fedora/commit/964fb381f7568c09036dd1a93f8a7b1eee5d9d74))
+* Install podman-desktop Flatpak ([#35](https://github.com/rsturla/immutable-fedora/issues/35)) ([9613fbb](https://github.com/rsturla/immutable-fedora/commit/9613fbbc8861a8bf2ca666b5b725f596c4a56ad8))
+
+
+### Bug Fixes
+
+* Access virt-manager using polkit rules ([#39](https://github.com/rsturla/immutable-fedora/issues/39)) ([08189b8](https://github.com/rsturla/immutable-fedora/commit/08189b8b52cb5c8a4fd2b09a207f63528dc8dc85))
+* Add custom GNOME desktop wallpaper entry ([#30](https://github.com/rsturla/immutable-fedora/issues/30)) ([7b0ec3a](https://github.com/rsturla/immutable-fedora/commit/7b0ec3a6df2df83ce8f3a551060312728acf0149))
+* Add default podman configuration for DevContainers ([#41](https://github.com/rsturla/immutable-fedora/issues/41)) ([04fb496](https://github.com/rsturla/immutable-fedora/commit/04fb496e025affeb0b07b79f71c41c5942395075))
+* Apply custom background to dark mode ([#29](https://github.com/rsturla/immutable-fedora/issues/29)) ([4ba241c](https://github.com/rsturla/immutable-fedora/commit/4ba241cc1c6ca4162a19726ff5a06703a52f919c))
+* Replace Docker with podman-docker ([#31](https://github.com/rsturla/immutable-fedora/issues/31)) ([183cb30](https://github.com/rsturla/immutable-fedora/commit/183cb30501f141ff0c94511d1237308c09e96222))
+* Set yaru-dark theme by default ([#38](https://github.com/rsturla/immutable-fedora/issues/38)) ([4764e72](https://github.com/rsturla/immutable-fedora/commit/4764e726084718b6729b5d8340d14386e9124e70))
+* Update firstboot to support RPMs, Flatpaks and user groups ([#27](https://github.com/rsturla/immutable-fedora/issues/27)) ([ef1960a](https://github.com/rsturla/immutable-fedora/commit/ef1960a4ec986f66027cc768a8bad5ef5e812d73))
+
+
+### Miscellaneous
+
+* Build NVIDIA ISOs during releases ([#42](https://github.com/rsturla/immutable-fedora/issues/42)) ([6b595e7](https://github.com/rsturla/immutable-fedora/commit/6b595e7369a7199f0cab562f7936e82ee4642726))
+* Refactor GitHub Actions build workflows ([#37](https://github.com/rsturla/immutable-fedora/issues/37)) ([c7322a4](https://github.com/rsturla/immutable-fedora/commit/c7322a4489821ee6aaebebbc90fe6e2e32a418f3))
+* Update README with latest tools and ISO information ([#34](https://github.com/rsturla/immutable-fedora/issues/34)) ([0aee865](https://github.com/rsturla/immutable-fedora/commit/0aee865e5ad227a03fccf37f78721d608be62cec))
+
 ## [1.1.0](https://github.com/rsturla/immutable-fedora/compare/v1.0.0...v1.1.0) (2023-04-03)
 
 
