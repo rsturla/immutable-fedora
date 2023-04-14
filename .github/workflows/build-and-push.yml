@@ -7,18 +7,20 @@ on:
     branches:
       - main
   pull_request:
+  workflow_dispatch:
 
 env:
   BASE_IMAGE: silverblue
   IMAGE_REGISTRY: ghcr.io/${{ github.repository_owner }}
 
 jobs:
-  build-and-push:
+  base:
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
       id-token: write
+
     strategy:
       fail-fast: false
       matrix:
@@ -39,13 +41,13 @@ jobs:
           DEFAULT_TAGS=()
 
           # Add :<version> tag - e.g. :37
-          DEFAULT_TAGS+=("${{ matrix.fedora-version }}")
+          MAJOR_VERSION_TAG="${{ matrix.fedora-version }}"
+
           # Add date tag - e.g. :20230101000000-<version>
-          DEFAULT_TAGS+=("$(date -u +%Y%m%d%H%M%S)-${{ matrix.fedora-version }}")
+          DATE_TAG="$(date -u +%Y%m%d%H%M%S)-${{ matrix.fedora-version }}"
+
           # Add short SHA tag - e.g. :abcdef-<version>
-          DEFAULT_TAGS+=("${GITHUB_SHA::8}-${{ matrix.fedora-version }}")
-          # Add full SHA tag - e.g. :abcdef0123456789abcdef0123456789abcdef-<version>
-          DEFAULT_TAGS+=("${GITHUB_SHA}-${{ matrix.fedora-version }}")
+          SHA_TAG="${GITHUB_SHA::8}-${{ matrix.fedora-version }}"
 
           # Add :latest tag if this is the latest Fedora version (inc. pre-releases)
           if [ "${{ matrix.is-latest }}" = "true" ]; then
@@ -57,22 +59,37 @@ jobs:
             DEFAULT_TAGS+=("stable")
           fi
 
+          DEFAULT_TAGS+=(
+            "${MAJOR_VERSION_TAG}"
+            "${DATE_TAG}"
+            "${SHA_TAG}"
+          )
+
           echo "TAGS=${DEFAULT_TAGS[*]}" >> $GITHUB_ENV
+          echo "SHA_TAG=${SHA_TAG}" >> $GITHUB_ENV
 
       - name: Generate Tags (Pull Request)
         if: github.event_name == 'pull_request'
         run: |
-          DEFAULT_TAGS+=("pr-${{ github.event.pull_request.number }}-${{ matrix.fedora-version }}")
+          PR_TAG="pr${{ github.event.pull_request.number }}-${{ matrix.fedora-version }}"
+          SHA_TAG="${GITHUB_SHA::8}-${{ matrix.fedora-version }}"
+
+          DEFAULT_TAGS+=(
+            "${PR_TAG}"
+            "${SHA_TAG}"
+          )
           echo "TAGS=${DEFAULT_TAGS[*]}" >> $GITHUB_ENV
+          echo "SHA_TAG=${SHA_TAG}" >> $GITHUB_ENV
 
       - name: Build Image
         uses: redhat-actions/buildah-build@v2
         id: build
         with:
           containerfiles: |
-            ./Containerfile
+            ./base/Containerfile
           image: ${{ env.BASE_IMAGE }}
           tags: ${{ env.TAGS }}
+          context: ./base
           build-args: |
             FEDORA_MAJOR_VERSION=${{ matrix.fedora-version }}
 
@@ -82,6 +99,126 @@ jobs:
         with:
           image: ${{ steps.build.outputs.image }}
           tags: ${{ steps.build.outputs.tags }}
+          registry: ${{ env.IMAGE_REGISTRY }}
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+
+  variants:
+    runs-on: ubuntu-latest
+    needs: base
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        fedora-version: [37, 38]
+        variant: [nvidia]
+        include:
+          - fedora-version: 37
+            is-stable: true
+          - fedora-version: 38
+            is-latest: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Generate Tags
+        if: github.ref == 'refs/heads/main'
+        run: |
+          DEFAULT_TAGS=()
+
+          # Add :<version> tag - e.g. :37
+          MAJOR_VERSION_TAG="${{ matrix.fedora-version }}-${{ matrix.variant}}"
+
+          # Add date tag - e.g. :20230101000000-<version>
+          DATE_TAG="$(date -u +%Y%m%d%H%M%S)-${{ matrix.fedora-version }}-${{ matrix.variant}}"
+
+          # Add short SHA tag - e.g. :abcdef-<version>
+          SHA_TAG="${GITHUB_SHA::8}-${{ matrix.fedora-version }}-${{ matrix.variant}}"
+
+          # Add :latest tag if this is the latest Fedora version (inc. pre-releases)
+          if [ "${{ matrix.is-latest }}" = "true" ]; then
+            DEFAULT_TAGS+=("latest-${{ matrix.variant}}")
+          fi
+
+          # Add :stable tag if this is the latest stable Fedora version
+          if [ "${{ matrix.is-stable }}" = "true" ]; then
+            DEFAULT_TAGS+=("stable-${{ matrix.variant}}")
+          fi
+
+          DEFAULT_TAGS+=(
+            "${MAJOR_VERSION_TAG}"
+            "${DATE_TAG}"
+            "${SHA_TAG}"
+          )
+
+          echo "TAGS=${DEFAULT_TAGS[*]}" >> $GITHUB_ENV
+          echo "SHA_TAG=${SHA_TAG}" >> $GITHUB_ENV
+
+      - name: Generate Tags (Pull Request)
+        if: github.event_name == 'pull_request'
+        run: |
+          PR_TAG="pr${{ github.event.pull_request.number }}-${{ matrix.fedora-version }}-${{ matrix.variant}}"
+          SHA_TAG="${GITHUB_SHA::8}-${{ matrix.fedora-version }}-${{ matrix.variant}}"
+
+          DEFAULT_TAGS+=(
+            "${PR_TAG}"
+            "${SHA_TAG}"
+          )
+          echo "TAGS=${DEFAULT_TAGS[*]}" >> $GITHUB_ENV
+          echo "SHA_TAG=${SHA_TAG}" >> $GITHUB_ENV
+
+      - name: Build Image
+        uses: redhat-actions/buildah-build@v2
+        if: github.event_name != 'pull_request'
+        id: build
+        with:
+          containerfiles: |
+            ./variants/${{ matrix.variant}}/Containerfile
+          image: ${{ env.BASE_IMAGE }}
+          tags: ${{ env.TAGS }}
+          context: ./variants/${{ matrix.variant}}
+          build-args: |
+            FEDORA_MAJOR_VERSION=${{ matrix.fedora-version }}
+            BASE_IMAGE_TAG=${{ matrix.fedora-version }}
+
+      - name: Build Image (Pull Request)
+        uses: redhat-actions/buildah-build@v2
+        if: github.event_name == 'pull_request'
+        id: build-pr
+        with:
+          containerfiles: |
+            ./variants/${{ matrix.variant}}/Containerfile
+          image: ${{ env.BASE_IMAGE }}
+          tags: ${{ env.TAGS }}
+          context: ./variants/${{ matrix.variant}}
+          build-args: |
+            FEDORA_MAJOR_VERSION=${{ matrix.fedora-version }}
+            BASE_IMAGE_TAG=pr${{ github.event.pull_request.number }}-${{ matrix.fedora-version }}
+
+      - name: Push to Registry
+        uses: redhat-actions/push-to-registry@v2
+        if: github.event_name != 'pull_request'
+        id: push
+        with:
+          image: ${{ steps.build.outputs.image }}
+          tags: ${{ steps.build.outputs.tags }}
+          registry: ${{ env.IMAGE_REGISTRY }}
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push to Registry (Pull Request)
+        uses: redhat-actions/push-to-registry@v2
+        if: github.event_name == 'pull_request'
+        id: push-pr
+        with:
+          image: ${{ steps.build-pr.outputs.image }}
+          tags: ${{ steps.build-pr.outputs.tags }}
           registry: ${{ env.IMAGE_REGISTRY }}
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
