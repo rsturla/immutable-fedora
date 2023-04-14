@@ -21,7 +21,5 @@
   "rpms": [
     "1password"
   ],
-  "userGroups": [
-    "libvirt"
-  ]
+  "userGroups": []
 }
