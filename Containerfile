@@ -6,6 +6,21 @@ ARG FEDORA_MAJOR_VERSION
 COPY usr /usr
 COPY etc /etc
 
+RUN wget https://download.docker.com/linux/fedora/docker-ce.repo -O /etc/yum.repos.d/docker-ce.repo && \
+  rpm-ostree install \
+  docker-ce \
+  docker-ce-cli \
+  containerd.io \
+  docker-buildx-plugin \
+  docker-compose-plugin \
+  && \
+  rm -f /etc/yum.repos.d/docker-ce.repo \
+  && \
+  systemctl enable docker.service \
+  && \
+  rm -rf /var/* /tmp/* && \
+  ostree container commit
+
 # Configure systemd services
 RUN sed -i 's/#AutomaticUpdatePolicy.*/AutomaticUpdatePolicy=stage/' /etc/rpm-ostreed.conf  && \
   systemctl enable rpm-ostreed-automatic.timer && \
@@ -31,7 +46,6 @@ RUN rpm-ostree override remove \
   libvirt virt-manager \
   chromium \
   zenity \
-  podman-docker \
   && \
   touch /etc/containers/nodocker \
   && \
