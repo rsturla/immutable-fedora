@@ -26,14 +26,14 @@ jobs:
       tag: ${{ steps.release-please.outputs.tag_name }}
       release_created: ${{ steps.release-please.outputs.release_created }}
 
-  publish-iso:
+  publish-base-iso:
     needs: release-please
     if: ${{ needs.release-please.outputs.release_created }}
     runs-on: ubuntu-latest
     container: fedora:latest
     strategy:
       matrix:
-        fedora-version: [ 37, 38 ]
+        fedora-version: [37, 38]
 
     steps:
       - name: Checkout
@@ -56,6 +56,53 @@ jobs:
         id: generate-iso
         with:
           filename: silverblue-${{ matrix.fedora-version }}
+          # Currently only the development branch includes support for booting from OCI images
+          installer-repo: development
+          kickstart-file-path: ${{ steps.generate-kickstart.outputs.kickstart-file-path }}
+
+      - name: Upload ISO to Release
+        shell: bash
+        run: |
+          sudo dnf install 'dnf-command(config-manager)' -y
+          sudo dnf config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo
+          sudo dnf install gh -y
+
+          gh release upload ${{ needs.release-please.outputs.tag }} ${{ steps.generate-iso.outputs.iso-path }} -R ${{ github.repository }} --clobber
+          gh release upload ${{ needs.release-please.outputs.tag }} ${{ steps.generate-iso.outputs.checksum-path }} -R ${{ github.repository }} --clobber
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  publish-variant-iso:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created }}
+    runs-on: ubuntu-latest
+    container: fedora:latest
+    strategy:
+      matrix:
+        fedora-version: [37, 38]
+        variant: [nvidia]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Generate Kickstart
+        id: generate-kickstart
+        shell: bash
+        run: |
+          dnf install -y gettext
+          cat kickstart.ks.tpl | envsubst > kickstart.ks
+          echo "kickstart-file-path=$(pwd)/kickstart.ks" >> $GITHUB_OUTPUT
+        env:
+          IMAGE_OWNER: ${{ github.repository_owner }}
+          IMAGE_NAME: silverblue
+          IMAGE_TAG: ${{ matrix.fedora-version }}-${{ matrix.variant }}
+
+      - name: Generate ISO
+        uses: ./.github/actions/generate-iso
+        id: generate-iso
+        with:
+          filename: silverblue-${{ matrix.fedora-version }}-${{ matrix.variant }}
           # Currently only the development branch includes support for booting from OCI images
           installer-repo: development
           kickstart-file-path: ${{ steps.generate-kickstart.outputs.kickstart-file-path }}
