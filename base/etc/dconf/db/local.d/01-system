@@ -13,8 +13,3 @@ theme-name='Yaru'
 [org/gnome/desktop/wm/preferences]
 button-layout=':minimize,maximize,close'
 num-workspaces='4'
-
-[org/gnome/software]
-allow-updates=false
-download-updates=false
-download-updates-notify=false

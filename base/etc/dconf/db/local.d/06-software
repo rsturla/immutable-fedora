@@ -1,0 +1,5 @@
+[org/gnome/software]
+allow-updates=false
+download-updates=false
+download-updates-notify=false
+external-appstream-urls=['https://appstream.endlessos.org/app-info/eos-extra.xml.gz']
