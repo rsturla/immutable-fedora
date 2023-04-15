@@ -72,3 +72,9 @@ RUN rpm-ostree override remove \
   && \
   rm -rf /tmp/* /var/* && \
   ostree container commit
+
+# xset allows us to change how often the screen turns off
+RUN rpm-ostree install xset \
+  && \
+  rm -rf /tmp/* /var/* && \
+  ostree container commit
