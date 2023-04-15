@@ -21,5 +21,7 @@
   "rpms": [
     "1password"
   ],
-  "userGroups": []
+  "userGroups": [
+    "docker"
+  ]
 }
