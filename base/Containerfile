@@ -75,3 +75,9 @@ RUN rpm-ostree install \
   && \
   rm -rf /var/* /tmp/* && \
   ostree container commit
+
+# Add Steam udev rules from https://raw.githubusercontent.com/ValveSoftware/steam-devices/master/60-steam-input.rules
+RUN curl -s https://raw.githubusercontent.com/ValveSoftware/steam-devices/master/60-steam-input.rules -o /etc/udev/rules.d/60-steam-input.rules \
+  && \
+  rm -rf /var/* /tmp/* && \
+  ostree container commit
