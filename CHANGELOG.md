@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.3.0](https://github.com/rsturla/immutable-fedora/compare/v1.2.0...v1.3.0) (2023-04-17)
+
+
+### Features
+
+* Install Docker ([#40](https://github.com/rsturla/immutable-fedora/issues/40)) ([420a069](https://github.com/rsturla/immutable-fedora/commit/420a06913801c7817f878c7a8fc17a6c1f1ad418))
+
+
+### Bug Fixes
+
+* Create Steam devices udev rules ([#45](https://github.com/rsturla/immutable-fedora/issues/45)) ([cb07f97](https://github.com/rsturla/immutable-fedora/commit/cb07f974da5c6edd2ecb0cd71dc3766901342705))
+* Install `xset` in nvidia images ([#46](https://github.com/rsturla/immutable-fedora/issues/46)) ([bf08782](https://github.com/rsturla/immutable-fedora/commit/bf08782aae860ebe3b4e65ed55d8ee3d407b02cd))
+* Remove podman default configuration ([#43](https://github.com/rsturla/immutable-fedora/issues/43)) ([0a12e4b](https://github.com/rsturla/immutable-fedora/commit/0a12e4b15ce755b874e97a06a2f1a03d89aa79ec))
+
 ## [1.2.0](https://github.com/rsturla/immutable-fedora/compare/v1.1.0...v1.2.0) (2023-04-14)
 
 
